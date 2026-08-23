@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#3E2009"/>
+<title>The Wellness Script</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+h1,h2,h3,h4{font-family:"Cormorant Garamond",serif;font-weight:400;line-height:1.15}
+button{cursor:pointer;font-family:"DM Sans",sans-serif;border:none;outline:none}
+input,textarea,select{font-family:"DM Sans",sans-serif;outline:none;border:none}
+a{text-decoration:none}
+
+/* ── THEMES ── */
+body.theme-cream{
+  --bg:#FBF3EC;--bg2:#F2E3D5;--bg3:#EDD9C4;
+  --pri:#3E2009;--pri2:#7A5438;--pri3:#A07050;
+  --acc:#F2C4A0;--acc2:#C49A7E;--acc3:#FDF0E6;
+  --card:#FFFFFF;--txt:#3E2009;--txt2:#7A5438;--txt3:#A07868;
+  --border:#EDD9C4;--nav:#3E2009;--nav-txt:#FBF3EC;--nav-acc:#F2C4A0;
+}
+body.theme-dark{
+  --bg:#130B04;--bg2:#1E1008;--bg3:#2A160A;
+  --pri:#F2C4A0;--pri2:#C49A7E;--pri3:#A07858;
+  --acc:#F2C4A0;--acc2:#C49A7E;--acc3:#2A160A;
+  --card:#221208;--txt:#FBF3EC;--txt2:#C49A7E;--txt3:#A07858;
+  --border:#3A200E;--nav:#0A0602;--nav-txt:#FBF3EC;--nav-acc:#F2C4A0;
+}
+body.theme-sage{
+  --bg:#F0F5F1;--bg2:#E0EDE2;--bg3:#D0E4D2;
+  --pri:#1E3D20;--pri2:#3A6B3C;--pri3:#5A9A5C;
+  --acc:#7BBF7E;--acc2:#5A9A5C;--acc3:#E8F5E9;
+  --card:#FFFFFF;--txt:#1E3D20;--txt2:#3A6B3C;--txt3:#5A9A5C;
+  --border:#C8E0CA;--nav:#1E3D20;--nav-txt:#FFFFFF;--nav-acc:#7BBF7E;
+}
+body.theme-blush{
+  --bg:#FEF0F4;--bg2:#FDE0EA;--bg3:#FCCDE0;
+  --pri:#6B1828;--pri2:#A03050;--pri3:#CC5070;
+  --acc:#F090B0;--acc2:#D06090;--acc3:#FEE8F0;
+  --card:#FFFFFF;--txt:#6B1828;--txt2:#A03050;--txt3:#CC5070;
+  --border:#FCCDE0;--nav:#6B1828;--nav-txt:#FFFFFF;--nav-acc:#F090B0;
+}
+
+/* ── LAYOUT ── */
+body{font-family:"DM Sans",sans-serif;font-weight:300;font-size:16px;color:var(--txt);background:var(--bg);transition:background .3s,color .3s}
+#app{height:100dvh;display:flex;flex-direction:column}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;display:none}
+.screen.active{display:block}
+
+/* ── NAV ── */
+nav{height:68px;background:var(--nav);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:flex-start;padding-top:6px;flex-shrink:0;position:relative;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;background:none;color:var(--nav-txt);opacity:.4;transition:opacity .2s}
+.nav-btn.on{opacity:1}
+.nav-icon{font-size:1.3rem;line-height:1}
+.nav-lbl{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase}
+
+/* ── TOP BARS ── */
+.top{background:var(--pri);padding:1rem 1.25rem .75rem;position:sticky;top:0;z-index:50}
+.top h2{font-size:1.45rem;color:var(--nav-txt)}
+.top-sub{font-size:.68rem;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-top:.15rem}
+
+/* ── THEME SWITCHER ── */
+.theme-bar{display:flex;gap:.5rem;padding:.75rem 1rem;overflow-x:auto;scrollbar-width:none}
+.theme-bar::-webkit-scrollbar{display:none}
+.th-btn{padding:.45rem 1rem;border-radius:40px;font-size:.72rem;letter-spacing:.06em;white-space:nowrap;border:1.5px solid var(--border);background:var(--card);color:var(--txt2);transition:all .2s;flex-shrink:0}
+.th-btn.on{background:var(--pri);color:var(--nav-txt);border-color:var(--pri)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:18px;padding:1.25rem;margin:.65rem 1rem;border:1px solid var(--border);transition:background .3s,border .3s}
+.card-sm{background:var(--acc3);border-radius:14px;padding:.9rem 1rem;margin:.5rem 1rem;border:1px solid var(--border)}
+.card-title{font-family:"Cormorant Garamond",serif;font-size:1.2rem;margin-bottom:.85rem;color:var(--txt)}
+.sec-lbl{padding:.7rem 1rem .2rem;font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2)}
+
+/* ── FORMS ── */
+.field{margin-bottom:.9rem}
+.field label{display:block;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:.35rem}
+.field input,.field textarea,.field select{
+  width:100%;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:.7rem .9rem;font-size:.88rem;color:var(--txt);transition:border-color .2s,background .3s
+}
+.field input:focus,.field textarea:focus{border-color:var(--acc2)}
+.field textarea{resize:vertical;min-height:90px;line-height:1.6}
+.field select{-webkit-appearance:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem}
+
+/* ── RATING STARS ── */
+.stars{display:flex;gap:.4rem;margin-top:.3rem}
+.star{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);font-size:.85rem;font-weight:500;color:var(--txt2);display:flex;align-items:center;justify-content:center;transition:all .15s;cursor:pointer}
+.star.on{background:var(--pri);color:var(--nav-txt);border-color:var(--pri)}
+.emoji-row{display:flex;gap:.4rem;margin-top:.3rem;flex-wrap:wrap}
+.emj{width:44px;height:44px;border-radius:12px;background:var(--bg);border:1.5px solid var(--border);font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:all .15s;cursor:pointer}
+.emj.on{background:var(--acc3);border-color:var(--acc2);box-shadow:0 0 0 2px var(--acc2)}
+
+/* ── BUTTONS ── */
+.btn{padding:.78rem 1.4rem;border-radius:50px;font-size:.82rem;font-weight:500;letter-spacing:.04em;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;cursor:pointer}
+.btn-full{width:100%}
+.btn-pri{background:var(--pri);color:var(--nav-txt)}
+.btn-pri:hover{opacity:.88}
+.btn-ghost{background:var(--acc3);color:var(--pri);border:1px solid var(--border)}
+.btn-del{background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;font-size:.72rem;padding:.35rem .7rem;border-radius:8px}
+.btn-back{display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--txt2);padding:1rem;background:none;border:none;cursor:pointer;color:var(--txt2)}
+
+/* ── CALENDAR ── */
+.cal-wrap{margin:.65rem 1rem;background:var(--card);border-radius:18px;padding:1.1rem;border:1px solid var(--border)}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
+.cal-nav h3{font-family:"Cormorant Garamond",serif;font-size:1.15rem;color:var(--txt)}
+.cal-nav-btn{background:var(--acc3);border:1px solid var(--border);border-radius:8px;padding:.3rem .7rem;font-size:.8rem;color:var(--txt2);cursor:pointer}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day-lbl{text-align:center;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);padding-bottom:.4rem}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--txt2);cursor:pointer;transition:all .15s;border:1px solid transparent;position:relative}
+.cal-day.empty{background:transparent;cursor:default}
+.cal-day.today{border-color:var(--acc2)}
+.cal-day.has-data{color:white;font-weight:500}
+.cal-day.green{background:#4CAF50}
+.cal-day.yellow{background:#FFC107;color:var(--txt)}
+.cal-day.red{background:#F44336}
+.cal-day.blue-ok{background:#2196F3}
+.cal-day.blue-lo{background:#90CAF9;color:var(--txt)}
+.cal-day.orange{background:#FF9800}
+.cal-day:hover:not(.empty){transform:scale(1.1)}
+.cal-legend{display:flex;gap:.75rem;margin-top:.65rem;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:.3rem;font-size:.65rem;color:var(--txt2)}
+.leg-dot{width:10px;height:10px;border-radius:50%}
+
+/* ── ENTRIES ── */
+.entry{background:var(--card);border-radius:14px;padding:1rem;margin:.4rem 1rem;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem}
+.ent-date{font-size:.65rem;color:var(--acc2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.2rem}
+.ent-val{font-family:"Cormorant Garamond",serif;font-size:1.25rem;color:var(--txt)}
+.ent-sub{font-size:.75rem;color:var(--txt2);margin-top:.2rem;line-height:1.5}
+.ent-diary{font-size:.78rem;color:var(--txt2);font-style:italic;margin-top:.4rem;padding:.5rem;background:var(--bg);border-radius:8px;line-height:1.6}
+
+/* ── BP FLAG ── */
+.bp-flag{border-radius:12px;padding:.7rem 1rem;margin:.5rem 1rem;border:1px solid transparent}
+.bp-flag.ok{background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20}
+.bp-flag.low{background:#E3F2FD;border-color:#90CAF9;color:#0D47A1}
+.bp-flag.pre{background:#FFF9E6;border-color:#FFE082;color:#5D4037}
+.bp-flag.hi1{background:#FFF3E0;border-color:#FFCC80;color:#E65100}
+.bp-flag.hi2{background:#FFEBEE;border-color:#EF9A9A;color:#B71C1C}
+.bp-flag.crisis{background:#B71C1C;border-color:#B71C1C;color:white}
+.bp-flag-title{font-weight:600;font-size:.85rem;margin-bottom:.2rem}
+.bp-flag-msg{font-size:.78rem;line-height:1.6}
+
+/* ── PHARMA NOTE ── */
+.pnote{background:var(--pri);border-radius:14px;padding:1rem 1.1rem;margin:.65rem 1rem}
+.pnote-lbl{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--nav-acc);margin-bottom:.35rem}
+.pnote-txt{font-size:.8rem;line-height:1.7;color:rgba(255,255,255,.72)}
+
+/* ── HOME ── */
+.home-hero{background:var(--pri);padding:1.5rem 1.25rem 1.75rem}
+.home-greet{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:.3rem}
+.home-title{font-family:"Cormorant Garamond",serif;font-size:1.9rem;color:var(--nav-txt);line-height:1.2}
+.home-title em{font-style:italic;color:var(--nav-acc)}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin:.7rem 1rem}
+.stat-card{background:var(--card);border-radius:14px;padding:.85rem .7rem;text-align:center;border:1px solid var(--border)}
+.stat-num{font-family:"Cormorant Garamond",serif;font-size:1.6rem;color:var(--pri);line-height:1}
+.stat-lbl{font-size:.62rem;color:var(--txt2);margin-top:.2rem;letter-spacing:.04em}
+.shortcut-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.5rem 1rem}
+.sc{background:var(--card);border-radius:16px;padding:1.1rem;border:1px solid var(--border);transition:transform .2s}
+.sc:hover{transform:translateY(-2px)}
+.sc-icon{font-size:1.5rem;margin-bottom:.4rem}
+.sc-name{font-family:"Cormorant Garamond",serif;font-size:1.05rem;color:var(--txt)}
+.sc-sub{font-size:.7rem;color:var(--txt2);margin-top:.15rem}
+
+/* ── LEARN ── */
+.art-card{background:var(--card);border-radius:18px;margin:.6rem 1rem;border:1px solid var(--border);overflow:hidden}
+.art-thumb{height:88px;display:flex;align-items:center;justify-content:center;font-size:2.2rem}
+.art-body{padding:1rem}
+.art-cat{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--acc2);margin-bottom:.3rem}
+.art-title{font-family:"Cormorant Garamond",serif;font-size:1.12rem;color:var(--txt);margin-bottom:.3rem;line-height:1.3}
+.art-prev{font-size:.78rem;line-height:1.6;color:var(--txt2)}
+.art-full h3{font-family:"Cormorant Garamond",serif;font-size:1.2rem;color:var(--txt);margin:1rem 0 .4rem}
+.art-full p{font-size:.85rem;line-height:1.8;color:var(--txt2);margin-bottom:.7rem}
+.cat-badge{display:inline-block;background:var(--acc3);color:var(--acc2);border-radius:20px;padding:.2rem .65rem;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase}
+
+/* ── CONTACT ── */
+.contact-wrap{padding:1.5rem 1rem}
+.contact-wrap h2{font-size:1.4rem;margin-bottom:.5rem}
+.contact-item{display:flex;align-items:center;gap:.75rem;padding:1rem;background:var(--card);border-radius:14px;margin-bottom:.6rem;border:1px solid var(--border)}
+.ci-icon{width:44px;height:44px;background:var(--acc3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.ci-lbl{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:.15rem}
+.ci-val{font-size:.88rem;color:var(--pri);font-weight:500}
+
+/* ── WEEKLY DIARY ── */
+.mood-faces{display:flex;gap:.5rem;margin-top:.3rem}
+.face-btn{width:48px;height:48px;border-radius:12px;background:var(--bg);border:1.5px solid var(--border);font-size:1.4rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.face-btn.on{background:var(--acc3);border-color:var(--acc2);transform:scale(1.1)}
+.water-track{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.35rem}
+.w-drop{width:36px;height:36px;border-radius:8px;background:var(--bg);border:1.5px solid var(--border);font-size:1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.w-drop.on{background:#BBDEFB;border-color:#64B5F6}
+.toggle-row{display:flex;gap:.5rem;margin-top:.35rem}
+.tog{padding:.45rem 1rem;border-radius:30px;border:1.5px solid var(--border);background:var(--bg);font-size:.78rem;color:var(--txt2);cursor:pointer;transition:all .15s}
+.tog.on{background:var(--pri);color:var(--nav-txt);border-color:var(--pri)}
+
+/* ── PAYWALL ── */
+#gate{position:fixed;inset:0;z-index:999;background:var(--pri);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;transition:opacity .4s}
+#gate.hidden{opacity:0;pointer-events:none}
+.gate-logo{font-family:"Cormorant Garamond",serif;font-size:2rem;font-weight:600;color:var(--nav-txt);text-align:center;margin-bottom:.3rem;white-space:nowrap}
+.gate-logo span{font-style:italic;color:var(--nav-acc)}
+.gate-sub{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.4);text-align:center;margin-bottom:2.5rem}
+.gate-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:2rem;width:100%;max-width:380px}
+.gate-card h2{font-family:"Cormorant Garamond",serif;font-size:1.6rem;color:var(--nav-txt);margin-bottom:.4rem}
+.gate-card p{font-size:.82rem;line-height:1.7;color:rgba(255,255,255,.5);margin-bottom:1.5rem}
+.gate-input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:.85rem 1.1rem;font-size:1rem;color:var(--nav-txt);letter-spacing:.12em;text-align:center;margin-bottom:.75rem;font-family:"DM Sans",sans-serif}
+.gate-input::placeholder{color:rgba(255,255,255,.3);letter-spacing:.08em;font-size:.85rem}
+.gate-input:focus{border-color:var(--nav-acc);outline:none}
+.gate-btn{width:100%;padding:.9rem;border-radius:50px;font-family:"DM Sans",sans-serif;font-size:.88rem;font-weight:500;letter-spacing:.05em;cursor:pointer;border:none;transition:all .2s}
+.gate-btn-pri{background:var(--nav-acc);color:var(--pri);margin-bottom:.6rem}
+.gate-btn-pri:hover{opacity:.88}
+.gate-btn-sec{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);font-size:.78rem}
+.gate-btn-sec:hover{border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.8)}
+.gate-error{background:rgba(244,67,54,.2);border:1px solid rgba(244,67,54,.4);color:#FFCDD2;border-radius:10px;padding:.6rem .9rem;font-size:.78rem;text-align:center;margin-bottom:.75rem;display:none}
+.gate-error.show{display:block}
+.gate-divider{display:flex;align-items:center;gap:.75rem;margin:.75rem 0}
+.gate-divider span{font-size:.7rem;color:rgba(255,255,255,.25);white-space:nowrap}
+.gate-divider::before,.gate-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.12)}
+.gate-footer{margin-top:2rem;text-align:center;font-size:.68rem;color:rgba(255,255,255,.25);line-height:1.7;max-width:320px}
+@media(max-width:360px){.row3{grid-template-columns:1fr 1fr}.stat-row{grid-template-columns:1fr 1fr}}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:2.5rem 1.5rem;color:var(--txt2)}
+.empty-icon{font-size:2.2rem;margin-bottom:.65rem}
+.empty h3{font-family:"Cormorant Garamond",serif;font-size:1.25rem;color:var(--txt);margin-bottom:.35rem}
+.empty p{font-size:.82rem;line-height:1.7}
+</style>
+</head>
+<body class="theme-cream">
+<!-- PAYWALL GATE -->
+<div id="gate">
+  <div class="gate-logo">The Wellness <span>Script</span></div>
+  <div class="gate-sub">Pharmacist-Crafted Wellness App</div>
+  <div class="gate-card">
+    <h2>Welcome back</h2>
+    <p>Enter your access code to open your wellness app. You received this code with your purchase.</p>
+    <div class="gate-error" id="gate-err">Incorrect code. Please check your purchase confirmation email.</div>
+    <input class="gate-input" id="gate-code" type="password" placeholder="Enter your access code" autocomplete="off" onkeydown="if(event.key==='Enter')checkCode()"/>
+    <button class="gate-btn gate-btn-pri" onclick="checkCode()">Enter App</button>
+    <div class="gate-divider"><span>Don't have access yet?</span></div>
+    <button class="gate-btn gate-btn-sec" onclick="window.open('https://thewellnessscript.gumroad.com','_blank')">Purchase Access on Gumroad</button>
+  </div>
+  <div class="gate-footer">
+    Your data is stored only on your device and never shared.<br>
+    Questions? Email thewellnessscriptedu@gmail.com
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- SCREENS -->
+  <div id="s-home"  class="screen active"></div>
+  <div id="s-sleep" class="screen"></div>
+  <div id="s-bp"    class="screen"></div>
+  <div id="s-diary" class="screen"></div>
+  <div id="s-learn" class="screen"></div>
+  <div id="s-contact" class="screen"></div>
+  <div id="s-article" class="screen"></div>
+
+  <!-- NAV -->
+  <nav>
+    <button class="nav-btn on" onclick="go('home')"><span class="nav-icon">&#127968;</span><span class="nav-lbl">Home</span></button>
+    <button class="nav-btn" onclick="go('sleep')"><span class="nav-icon">&#128164;</span><span class="nav-lbl">Sleep</span></button>
+    <button class="nav-btn" onclick="go('bp')"><span class="nav-icon">&#129658;</span><span class="nav-lbl">Blood P.</span></button>
+    <button class="nav-btn" onclick="go('diary')"><span class="nav-icon">&#128214;</span><span class="nav-lbl">Diary</span></button>
+    <button class="nav-btn" onclick="go('learn')"><span class="nav-icon">&#127981;</span><span class="nav-lbl">Learn</span></button>
+    <button class="nav-btn" onclick="go('contact')"><span class="nav-icon">&#9993;</span><span class="nav-lbl">Contact</span></button>
+  </nav>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  ARTICLES
+// ═══════════════════════════════════════════════
+const ARTS=[
+  {id:"sleep",cat:"Sleep",bg:"#FDF0E6",icon:"\u{1F4A4}",title:"The Science of Sleep",prev:"Why 7-9 hours matters and what happens in each sleep stage.",pnote:"Medications including beta-blockers, steroids and diuretics can disrupt sleep. If you notice changes since starting a new medication, speak to your pharmacist.",secs:[{h:"Why sleep matters",p:"Adults need 7-9 hours per night (NHS). Sleep is when your brain consolidates memories, your immune system repairs, and growth hormone is released."},{h:"Sleep stages",p:"Your brain cycles through 4 stages roughly every 90 minutes. Stage 3 is physical repair. REM sleep is for emotional processing and memory. You need 4-6 full cycles."},{h:"Signs of poor sleep",p:"Waking unrefreshed, afternoon crashes, difficulty concentrating, low mood, increased hunger — even if you slept enough hours."},{h:"What helps",p:"Consistency is the biggest factor — same sleep and wake time every day. Darkness, a cool room (16-18C), and no screens 60 minutes before bed all have strong evidence."}],refs:"NHS · Matthew Walker PhD · NIH National Sleep Foundation"},
+  {id:"magnesium",cat:"Supplements",bg:"#EAF4EA",icon:"\u{1F33F}",title:"Magnesium: Why Most of Us Are Deficient",prev:"Involved in 300+ bodily reactions. Nearly 2 in 3 people don't get enough.",pnote:"UK RNI is 300mg/day (men) and 270mg/day (women). Supplemental upper limit 400mg/day. Magnesium glycinate is best for sleep and anxiety. Space 2-4 hours from antibiotics, levothyroxine and bisphosphonates.",secs:[{h:"What magnesium does",p:"Involved in over 300 enzymatic reactions — energy production, muscle and nerve function, blood pressure, blood sugar, DNA synthesis and sleep."},{h:"Who is deficient?",p:"People taking PPIs or diuretics, type 2 diabetes, GI conditions (Crohn's, coeliac), older adults, and anyone eating mainly processed food."},{h:"Signs of low magnesium",p:"Muscle cramps, fatigue, difficulty sleeping, anxiety, headaches, heart palpitations and constipation can all be signs."},{h:"Which supplement?",p:"Glycinate: best for sleep/anxiety. Citrate: good absorption but may cause loose stools. Oxide: poor absorption (~4%) — mainly a laxative."}],refs:"NIH · Nutrients 2025 · UK Expert Group on Vitamins & Minerals"},
+  {id:"vitd",cat:"Supplements",bg:"#FFFBEA",icon:"\u2600",title:"Vitamin D: The UK Epidemic",prev:"1 in 5 UK adults are deficient. Most don't know it.",pnote:"NICE recommends 10 micrograms (400 IU) daily Oct-March. At-risk groups supplement year-round. Take with a fatty meal. Upper safe limit 4000 IU daily. Always choose D3 over D2.",secs:[{h:"Why we're all deficient",p:"UK latitude means UVB rays Oct-March are too weak to synthesise Vitamin D — affecting 1 in 5 UK adults."},{h:"What Vitamin D does",p:"Regulates calcium absorption, activates immune cells, supports mood and mental health, and plays a role in cardiovascular health."},{h:"Who is most at risk?",p:"Over 65s, darker skin tones, pregnant women, those covering skin for cultural reasons, and anyone mostly indoors."},{h:"D3 vs D2",p:"D3 (cholecalciferol) is significantly more effective than D2 at raising blood levels. Always choose D3."}],refs:"NICE PH56 (2025) · NHS · SACN · BNF"},
+  {id:"b12",cat:"Supplements",bg:"#F0EBFF",icon:"\u{1F49C}",title:"Vitamin B12: The Silent Deficiency",prev:"NICE published its first-ever B12 guideline in March 2024.",pnote:"NICE NG239 (2024): deficiency = B12 below 148 pmol/L. Metformin, PPIs and H2 blockers all deplete B12. Vegans must supplement. Neurological symptoms can be irreversible if untreated.",secs:[{h:"What B12 does",p:"Essential for red blood cell production, myelin sheath integrity, brain function, energy metabolism and DNA repair."},{h:"Who is at risk?",p:"Vegans, metformin users, over 60s, PPI users, pernicious anaemia, and pregnant women."},{h:"Symptoms",p:"Extreme fatigue, pale or yellow skin, sore tongue, mouth ulcers, tingling in hands and feet, memory problems, irritability."},{h:"Treatment",p:"Dietary cause: oral cyanocobalamin 50-150mcg daily. Malabsorption: IM hydroxocobalamin 3-monthly or 2-monthly if neurological."}],refs:"NICE NG239 (March 2024) · BNF · BSH 2024"},
+  {id:"cortisol",cat:"Hormones",bg:"#FFF4E6",icon:"\u26A1",title:"Cortisol: Your Stress Hormone",prev:"Chronically high cortisol silently affects your sleep, weight and mood.",pnote:"Steroids, stimulants and some antidepressants can raise cortisol. Caffeine also stimulates cortisol release — limit after 2pm. Consistent sleep and wake times are the most effective intervention.",secs:[{h:"What is cortisol?",p:"Produced by adrenal glands in response to stress. Peaks naturally 30 minutes after waking. In short bursts it is protective — chronically elevated it is damaging."},{h:"Effects of high cortisol",p:"Hippocampus atrophy, immune suppression (NK cells reduced by 70%), visceral fat storage, elevated BP, depression, anxiety and disrupted cycles."},{h:"Signs it may be high",p:"Waking tired despite sleep, belly weight gain, brain fog, feeling wired but exhausted, frequent illness, craving sugar or salt."},{h:"Evidence-based solutions",p:"Sleep consistency (biggest intervention), mindfulness (medium effect size, Psychoneuroendocrinology 2024), moderate exercise, breathwork (4-7-8 technique)."}],refs:"NIH · Frontiers in Endocrinology 2023 · Psychoneuroendocrinology 2024"},
+  {id:"anaemia",cat:"Health",bg:"#FEF0F0",icon:"\u{1FA78}",title:"Anaemia: Know the Signs",prev:"Affects 1.92 billion people worldwide. Iron deficiency is the most missed.",pnote:"IDA in men or post-menopausal women requires urgent GI investigation (BSG 2025). First-line: ferrous sulphate 200mg twice daily. NICE CKS (Aug 2024) recommends alternate-day dosing. Continue 3 months after Hb normalises.",secs:[{h:"What is anaemia?",p:"Reduced ability of blood to carry oxygen. Defined as Hb below 130 g/L in men and 120 g/L in women. Iron deficiency is the most common type."},{h:"Symptoms",p:"Persistent fatigue, pallor (check inner eyelid), breathlessness, palpitations, dizziness, cold hands/feet, poor concentration. Pica (craving ice or soil) is a classic IDA sign."},{h:"Red flags",p:"Chest pain, severe breathlessness at rest, blood in stool or vomit, rapid weight loss — seek urgent medical help."},{h:"Treatment",p:"Ferrous sulphate 200mg twice daily. Take with vitamin C. Avoid tea/coffee within 1 hour. Alternate-day dosing is better absorbed with fewer side effects."}],refs:"NICE CKS Aug 2024 · BSG 2025 · NHS"},
+  {id:"bphealth",cat:"Health",bg:"#EEF2FF",icon:"\u{1FA7A}",title:"Understanding Your Blood Pressure",prev:"5.5 million UK adults have high BP and don't know it.",pnote:"Home monitoring gives your GP a far better picture than clinic readings. Note whether readings are taken before or after medication — this is clinically important. Bring your log to every appointment.",secs:[{h:"What the numbers mean",p:"Systolic over diastolic in mmHg. Optimal: below 120/80. Above 140/90 consistently is hypertension (NICE NG136)."},{h:"Why it matters",p:"Hypertension is the #1 preventable cause of stroke in the UK. A 5 mmHg systolic drop reduces stroke risk by 14% (Lancet 2021)."},{h:"Common medications",p:"ACE inhibitors (ramipril), calcium channel blockers (amlodipine), ARBs (losartan), beta-blockers (bisoprolol), thiazide diuretics (indapamide)."},{h:"Lifestyle impact",p:"Reduce salt, exercise regularly, limit alcohol, maintain healthy weight, and manage stress. All contribute meaningfully."}],refs:"NICE NG136 · BHF · Stroke Association · Lancet 2021"},
+];
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const load=k=>{ try{return JSON.parse(localStorage.getItem("tws_"+k)||"null")}catch{return null} };
+const save=k=>{ try{localStorage.setItem("tws_"+k,JSON.stringify(ST[k]))}catch{} };
+
+const ST={
+  page:"home", articleId:null, theme:load("theme")||"cream",
+  diaryTab:"weekly",
+  sleepView:"form", sleepMonth:new Date().toISOString().slice(0,7),
+  bpView:"form",   bpMonth:  new Date().toISOString().slice(0,7),
+  sleepData: load("sleep")||{},
+  bpData:    load("bp")   ||{},
+  weeklyData:load("weekly")||{},
+  monthlyData:load("monthly")||{},
+  _sleepQ:0, _sleepW:0,
+  _todayMood:0, _todayWater:0, _todayMed:false,
+};
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+const today=()=>new Date().toISOString().slice(0,10);
+const nowT=()=>new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+const fmtD=d=>new Date(d+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
+const daysInMonth=(y,m)=>new Date(y,m,0).getDate();
+const firstDayOfMonth=(y,m)=>{ const d=new Date(y,m-1,1).getDay(); return d===0?6:d-1; };
+function setTheme(t){ ST.theme=t; save("theme"); document.body.className="theme-"+t; document.querySelectorAll(".th-btn").forEach(b=>b.classList.toggle("on",b.dataset.t===t)); }
+const MOODS=["\u{1F614}","\u{1F615}","\u{1F610}","\u{1F642}","\u{1F604}"];
+const WAKING=["\u{1F975}","\u{1F62C}","\u{1F610}","\u{1F60C}","\u{1F31F}"];
+
+// BP flagging per NHS guidelines
+function bpFlag(sys,dia){
+  if(!sys||!dia)return null;
+  if(sys>=180||dia>=120)return{cls:"crisis",title:"Hypertensive Crisis",msg:"Your reading is very high. Seek urgent medical attention — call 999 or go to A&E immediately."};
+  if(sys>=160||dia>=100)return{cls:"hi2",title:"Stage 2 High Blood Pressure",msg:"Your reading is high. Please contact your GP as soon as possible. Do not ignore this reading."};
+  if(sys>=140||dia>=90)return{cls:"hi1",title:"Stage 1 High Blood Pressure",msg:"Your reading is above the recommended range. Please contact your GP to discuss your blood pressure."};
+  if(sys>=130||dia>=85)return{cls:"pre",title:"High-Normal",msg:"Slightly elevated. Monitor closely, reduce salt, exercise regularly and limit alcohol. Discuss with your GP if this continues."};
+  if(sys<90||dia<60)return{cls:"low",title:"Low Blood Pressure",msg:"Your reading is low. If you feel dizzy, faint or lightheaded, contact your GP. Sit down until the feeling passes."};
+  if(sys<=120&&dia<=80)return{cls:"ok",title:"Optimal",msg:"Great reading! Your blood pressure is in the ideal range. Keep it up."};
+  return{cls:"ok",title:"Normal",msg:"Your reading is within the normal range. Continue monitoring regularly."};
+}
+function bpCalColor(entries){
+  if(!entries||!entries.length)return null;
+  const avg=entries.reduce((a,e)=>a+e.sys,0)/entries.length;
+  if(avg>=160)return"red";
+  if(avg>=140)return"orange";
+  if(avg>=130)return"yellow";
+  if(avg<90)return"blue-lo";
+  return"green";
+}
+function sleepCalColor(entry){
+  if(!entry||!entry.quality)return null;
+  if(entry.quality>=4)return"green";
+  if(entry.quality===3)return"yellow";
+  return"red";
+}
+
+// ═══════════════════════════════════════════════
+//  CALENDAR GENERATOR
+// ═══════════════════════════════════════════════
+function renderCal(monthStr, colorFn, legendHtml, onDayClick){
+  const [y,m]=monthStr.split("-").map(Number);
+  const days=daysInMonth(y,m), first=firstDayOfMonth(y,m);
+  const tod=today(), [ty,tm,td]=tod.split("-").map(Number);
+  const dayLabels=["Mo","Tu","We","Th","Fr","Sa","Su"];
+  let cells=dayLabels.map(d=>`<div class="cal-day-lbl">${d}</div>`).join("");
+  for(let i=0;i<first;i++) cells+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const col=colorFn(ds);
+    const isToday=y===ty&&m===tm&&d===td;
+    cells+=`<div class="cal-day${col?" has-data "+col:""}${isToday?" today":""}" onclick="${onDayClick}('${ds}')"><span>${d}</span></div>`;
+  }
+  const prev=m===1?`${y-1}-12`:`${y}-${String(m-1).padStart(2,"0")}`;
+  const next=m===12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,"0")}`;
+  const monthName=new Date(y,m-1,1).toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+  return `<div class="cal-wrap">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="calNav('${prev}')">&lt;</button>
+      <h3>${monthName}</h3>
+      <button class="cal-nav-btn" onclick="calNav('${next}')">&gt;</button>
+    </div>
+    <div class="cal-grid">${cells}</div>
+    <div class="cal-legend">${legendHtml}</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════
+function go(page){
+  ST.page=page; ST.articleId=null;
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("on"));
+  document.getElementById("s-"+page).classList.add("active");
+  const navMap={home:0,sleep:1,bp:2,diary:3,learn:4,contact:5};
+  if(navMap[page]!==undefined) document.querySelectorAll(".nav-btn")[navMap[page]].classList.add("on");
+  render();
+}
+function openArticle(id){ ST.articleId=id; document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); document.getElementById("s-article").classList.add("active"); renderArticle(); }
+function backToLearn(){ go("learn"); }
+
+// ═══════════════════════════════════════════════
+//  SLEEP PAGE
+// ═══════════════════════════════════════════════
+function sleepSetQ(v){ ST._sleepQ=v; document.querySelectorAll(".sq").forEach((b,i)=>b.classList.toggle("on",i<v)); }
+function sleepSetW(v){ ST._sleepW=v; document.querySelectorAll(".sw").forEach((b,i)=>b.classList.toggle("on",i===v-1)); }
+function submitSleep(){
+  const f=document.getElementById("slf");
+  const entry={
+    date:today(), bedtime:f.bedtime.value||"--", wake:f.wake.value||"--",
+    hours:parseFloat(f.hours.value)||0, quality:ST._sleepQ, waking:ST._sleepW,
+    meds:f.meds.value, other:f.other.value, diary:f.diary.value,
+    ts:Date.now()
+  };
+  ST.sleepData[today()]=entry; save("sleepData"); ST._sleepQ=0; ST._sleepW=0;
+  renderSleepPage();
+}
+function delSleep(d){ delete ST.sleepData[d]; save("sleepData"); renderSleepPage(); }
+function toggleSleepView(v){ ST.sleepView=v; renderSleepPage(); }
+function calNav(m){
+  if(ST.page==="sleep") ST.sleepMonth=m;
+  else ST.bpMonth=m;
+  render();
+}
+function sleepDayClick(d){
+  const e=ST.sleepData[d]; if(!e)return;
+  alert(fmtD(d)+"\n\nBedtime: "+e.bedtime+" → "+e.wake+"\nHours: "+e.hours+"h\nSleep quality: "+("★".repeat(e.quality)+"☆".repeat(5-e.quality))+"\nWaking: "+WAKING[e.waking-1]+"\nMedications: "+(e.meds||"Not noted")+"\nNotes: "+(e.other||"None")+"\n\nDiary: "+(e.diary||"No entry"));
+}
+function renderSleepPage(){
+  const qStars=[1,2,3,4,5].map(i=>`<button class="star sq${ST._sleepQ>=i?" on":""}" onclick="sleepSetQ(${i})">${i}</button>`).join("");
+  const wEmoji=WAKING.map((e,i)=>`<button class="emj sw${ST._sleepW===i+1?" on":""}" onclick="sleepSetW(${i+1})">${e}</button>`).join("");
+  const recentEntries=Object.entries(ST.sleepData).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10)
+    .map(([d,e])=>`<div class="entry">
+      <div>
+        <div class="ent-date">${fmtD(d)}</div>
+        <div class="ent-val">${e.hours}h sleep &nbsp;${"★".repeat(e.quality||0)}</div>
+        <div class="ent-sub">${e.bedtime} → ${e.wake} &nbsp;|&nbsp; Waking: ${WAKING[e.waking-1]||"--"}</div>
+        ${e.meds?`<div class="ent-sub">Meds: ${e.meds}</div>`:""}
+        ${e.other?`<div class="ent-sub">${e.other}</div>`:""}
+        ${e.diary?`<div class="ent-diary">"${e.diary}"</div>`:""}
+      </div>
+      <button class="btn-del" onclick="delSleep('${d}')">✕</button>
+    </div>`).join("")||`<div class="empty"><div class="empty-icon">💤</div><h3>No entries yet</h3><p>Log your first night above.</p></div>`;
+
+  const calLegend=`<div class="leg"><div class="leg-dot" style="background:#4CAF50"></div>Good (4-5)</div><div class="leg"><div class="leg-dot" style="background:#FFC107"></div>OK (3)</div><div class="leg"><div class="leg-dot" style="background:#F44336"></div>Poor (1-2)</div>`;
+  const calHtml=renderCal(ST.sleepMonth, d=>sleepCalColor(ST.sleepData[d]), calLegend, "sleepDayClick");
+
+  const viewBtns=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem">
+    <button class="th-btn${ST.sleepView==="form"?" on":""}" onclick="toggleSleepView('form')">Log Sleep</button>
+    <button class="th-btn${ST.sleepView==="cal"?" on":""}" onclick="toggleSleepView('cal')">Calendar</button>
+    <button class="th-btn${ST.sleepView==="log"?" on":""}" onclick="toggleSleepView('log')">History</button>
+  </div>`;
+
+  let main="";
+  if(ST.sleepView==="form") main=`
+  <div class="card">
+    <div class="card-title">Log last night's sleep</div>
+    <form id="slf" onsubmit="event.preventDefault();submitSleep()">
+      <div class="row2">
+        <div class="field"><label>Bedtime</label><input type="time" name="bedtime"/></div>
+        <div class="field"><label>Wake time</label><input type="time" name="wake"/></div>
+      </div>
+      <div class="field"><label>Hours slept</label><input type="number" name="hours" min="0" max="24" step="0.5" placeholder="e.g. 7.5"/></div>
+      <div class="field"><label>Sleep quality (1 = terrible, 5 = perfect)</label><div class="stars">${qStars}</div></div>
+      <div class="field"><label>How do you feel on waking?</label><div class="emoji-row">${wEmoji}</div></div>
+      <div class="field"><label>Medications taken last night?</label>
+        <select name="meds"><option value="">Select</option><option>Yes - all taken</option><option>Yes - some missed</option><option>No medications</option><option>New medication started</option></select>
+      </div>
+      <div class="field"><label>Other notes (symptoms, disruptions, room temp etc)</label><textarea name="other" placeholder="Anything that may have affected your sleep..."></textarea></div>
+      <div class="field"><label>Sleep diary - journal your thoughts freely</label><textarea name="diary" style="min-height:120px" placeholder="How are you feeling? Any worries, dreams, patterns you've noticed..."></textarea></div>
+      <button type="submit" class="btn btn-pri btn-full">Save Sleep Entry</button>
+    </form>
+  </div>
+  <div class="pnote"><div class="pnote-lbl">Pharmacist's Note</div><div class="pnote-txt">Track at the same time each morning for accuracy. Beta-blockers, steroids and diuretics can significantly affect sleep architecture. If you have started a new medication and noticed changes, speak to your pharmacist.</div></div>`;
+  else if(ST.sleepView==="cal") main=calHtml+`<div class="pnote"><div class="pnote-lbl">Reading your calendar</div><div class="pnote-txt">Green = good sleep (4-5 stars). Yellow = average (3 stars). Red = poor (1-2 stars). Tap any day to see that night's full entry.</div></div>`;
+  else main=`<p class="sec-lbl">Recent Sleep Entries</p>${recentEntries}`;
+
+  document.getElementById("s-sleep").innerHTML=`
+  <div class="top"><h2>Sleep Tracker</h2><div class="top-sub">Log, rate and review your sleep</div></div>
+  ${viewBtns}${main}`;
+}
+
+// ═══════════════════════════════════════════════
+//  BLOOD PRESSURE PAGE
+// ═══════════════════════════════════════════════
+function submitBP(){
+  const f=document.getElementById("bpf");
+  const sys=parseInt(f.sys.value), dia=parseInt(f.dia.value);
+  const entry={sys,dia,pulse:parseInt(f.pulse.value)||0,arm:f.arm.value,meds:f.meds.value,notes:f.notes.value,time:nowT(),ts:Date.now()};
+  const d=today();
+  if(!ST.bpData[d]) ST.bpData[d]=[];
+  ST.bpData[d].unshift(entry); save("bpData");
+  ST._bpFlag=bpFlag(sys,dia);
+  renderBPPage();
+}
+function delBP(d,i){ ST.bpData[d].splice(i,1); if(!ST.bpData[d].length) delete ST.bpData[d]; save("bpData"); renderBPPage(); }
+function toggleBPView(v){ ST.bpView=v; renderBPPage(); }
+function bpDayClick(d){
+  const entries=ST.bpData[d]; if(!entries||!entries.length)return;
+  alert(fmtD(d)+"\n\n"+entries.map(e=>`${e.time||""} — ${e.sys}/${e.dia} mmHg, Pulse: ${e.pulse} bpm\nArm: ${e.arm||"Not noted"}\nMeds: ${e.meds||"Not noted"}\nNotes: ${e.notes||"None"}`).join("\n\n"));
+}
+function renderBPPage(){
+  const flag=ST._bpFlag;
+  const flagHtml=flag?`<div class="bp-flag ${flag.cls}"><div class="bp-flag-title">${flag.title}</div><div class="bp-flag-msg">${flag.msg}</div></div>`:"";
+
+  // Simple SVG chart from last 14 readings
+  const allEntries=Object.entries(ST.bpData).sort((a,b)=>a[0].localeCompare(b[0])).flatMap(([d,es])=>es.map(e=>({...e,d})));
+  const recent=allEntries.slice(-14);
+  let chartHtml="";
+  if(recent.length>=2){
+    const sysVals=recent.map(e=>e.sys), diaVals=recent.map(e=>e.dia);
+    const all=[...sysVals,...diaVals], mx=Math.max(...all), mn=Math.min(...all), range=mx-mn||1;
+    const pw=310,ph=100,pad=10;
+    const mkPts=(vals,c)=>{
+      const pts=vals.map((v,i)=>{const x=pad+i*(pw-pad*2)/(vals.length-1);const y=ph-pad-(v-mn)/range*(ph-pad*2);return x+","+y;}).join(" ");
+      const dots=vals.map((v,i)=>{const x=pad+i*(pw-pad*2)/(vals.length-1);const y=ph-pad-(v-mn)/range*(ph-pad*2);return`<circle cx="${x}" cy="${y}" r="3.5" fill="${c}"/>`;}).join("");
+      return`<polyline points="${pts}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round"/>${dots}`;
+    };
+    chartHtml=`<div class="card">
+      <div class="card-title">BP Trend</div>
+      <svg viewBox="0 0 320 110" style="width:100%;height:120px" preserveAspectRatio="none">
+        <line x1="${pad}" y1="${ph-pad-(140-mn)/range*(ph-pad*2)}" x2="${pw}" y2="${ph-pad-(140-mn)/range*(ph-pad*2)}" stroke="#FFCC80" stroke-width="1" stroke-dasharray="4,3"/>
+        ${mkPts(sysVals,"#C49A7E")}${mkPts(diaVals,"#F2C4A0")}
+      </svg>
+      <div style="display:flex;gap:1rem;margin-top:.4rem;font-size:.68rem;color:var(--txt2)">
+        <span style="display:flex;align-items:center;gap:.3rem"><span style="width:14px;height:3px;background:#C49A7E;display:inline-block;border-radius:2px"></span>Systolic</span>
+        <span style="display:flex;align-items:center;gap:.3rem"><span style="width:14px;height:3px;background:#F2C4A0;display:inline-block;border-radius:2px"></span>Diastolic</span>
+        <span style="display:flex;align-items:center;gap:.3rem"><span style="width:14px;height:3px;background:#FFCC80;display:inline-block;border-radius:2px;border:1px dashed #FFCC80"></span>140 target</span>
+      </div>
+    </div>`;
+  }
+
+  const refCard=`<div class="card-sm"><div style="font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:.5rem">NHS Reference Ranges</div>
+  ${[["Optimal","< 120/80","#4CAF50"],["Normal","120-129 / 80-84","#8BC34A"],["High-Normal","130-139 / 85-89","#FFC107"],["High Stage 1","140-159 / 90-99","#FF9800"],["High Stage 2","160-179 / 100-119","#F44336"],["Crisis","≥ 180 / ≥ 120","#B71C1C"]].map(([l,v,c])=>`
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid var(--border)">
+    <span style="display:flex;align-items:center;gap:.5rem"><span style="width:9px;height:9px;background:${c};border-radius:50%;display:inline-block"></span><span style="font-size:.78rem">${l}</span></span>
+    <span style="font-size:.73rem;color:var(--txt2)">${v} mmHg</span>
+  </div>`).join("")}
+  <div style="font-size:.6rem;color:var(--txt3);margin-top:.4rem">Source: NICE NG136 / NHS</div></div>`;
+
+  const recentLog=Object.entries(ST.bpData).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,7).flatMap(([d,es])=>es.map((e,i)=>`
+  <div class="entry">
+    <div>
+      <div class="ent-date">${fmtD(d)} · ${e.time||""}</div>
+      <div class="ent-val">${e.sys}/${e.dia} <span style="font-size:.88rem;color:var(--txt2)">mmHg</span></div>
+      <div class="ent-sub">Pulse ${e.pulse||"--"} bpm · ${e.arm||"Arm not noted"}</div>
+      ${e.meds?`<div class="ent-sub">Meds: ${e.meds}</div>`:""}
+      ${e.notes?`<div class="ent-sub">${e.notes}</div>`:""}
+    </div>
+    <button class="btn-del" onclick="delBP('${d}',${i})">✕</button>
+  </div>`)).join("")||`<div class="empty"><div class="empty-icon">🩺</div><h3>No readings yet</h3><p>Add your first reading above.</p></div>`;
+
+  const calLegend=`<div class="leg"><div class="leg-dot" style="background:#4CAF50"></div>Optimal</div><div class="leg"><div class="leg-dot" style="background:#FFC107"></div>Elevated</div><div class="leg"><div class="leg-dot" style="background:#FF9800"></div>High</div><div class="leg"><div class="leg-dot" style="background:#F44336"></div>Very high</div>`;
+  const calHtml=renderCal(ST.bpMonth, d=>bpCalColor(ST.bpData[d]), calLegend, "bpDayClick");
+
+  const viewBtns=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem">
+    <button class="th-btn${ST.bpView==="form"?" on":""}" onclick="toggleBPView('form')">Log Reading</button>
+    <button class="th-btn${ST.bpView==="cal"?" on":""}" onclick="toggleBPView('cal')">Calendar</button>
+    <button class="th-btn${ST.bpView==="chart"?" on":""}" onclick="toggleBPView('chart')">Chart</button>
+    <button class="th-btn${ST.bpView==="log"?" on":""}" onclick="toggleBPView('log')">History</button>
+  </div>`;
+
+  let main="";
+  if(ST.bpView==="form") main=`
+  <div class="card">
+    <div class="card-title">Log a reading</div>
+    <form id="bpf" onsubmit="event.preventDefault();submitBP()">
+      <div class="row2">
+        <div class="field"><label>Systolic (top)</label><input type="number" name="sys" placeholder="e.g. 120"/></div>
+        <div class="field"><label>Diastolic (bottom)</label><input type="number" name="dia" placeholder="e.g. 80"/></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Pulse (bpm)</label><input type="number" name="pulse" placeholder="e.g. 72"/></div>
+        <div class="field"><label>Arm used</label><select name="arm"><option value="">Select</option><option>Left arm</option><option>Right arm</option></select></div>
+      </div>
+      <div class="field"><label>Medication taken before reading?</label>
+        <select name="meds"><option value="">Select</option><option>Yes - taken before reading</option><option>Yes - taken after reading</option><option>No medications</option></select>
+      </div>
+      <div class="field"><label>Notes (stress, caffeine, exercise before reading)</label><textarea name="notes" placeholder="Anything that may have affected this reading..."></textarea></div>
+      <button type="submit" class="btn btn-pri btn-full">Save Reading</button>
+    </form>
+  </div>
+  ${flagHtml}${refCard}
+  <div class="pnote"><div class="pnote-lbl">Pharmacist's Note</div><div class="pnote-txt">Sit quietly for 5 minutes before measuring. Take readings at the same time each day. Note whether taken before or after medication - this affects interpretation. Bring this log to every GP or pharmacist appointment.</div></div>`;
+  else if(ST.bpView==="cal") main=calHtml;
+  else if(ST.bpView==="chart") main=chartHtml+refCard;
+  else main=`<p class="sec-lbl">Reading History</p>${recentLog}`;
+
+  document.getElementById("s-bp").innerHTML=`
+  <div class="top"><h2>Blood Pressure</h2><div class="top-sub">Track and monitor your readings</div></div>
+  ${viewBtns}${main}`;
+}
+
+// ═══════════════════════════════════════════════
+//  WELLNESS DIARY
+// ═══════════════════════════════════════════════
+function getWeekKey(){ const d=new Date(); const day=d.getDay()||7; const mon=new Date(d); mon.setDate(d.getDate()-day+1); return mon.toISOString().slice(0,10); }
+function getMonthKey(){ return new Date().toISOString().slice(0,7); }
+
+function saveWeekly(){
+  const f=document.getElementById("wf"); if(!f) return;
+  const k=getWeekKey();
+  ST.weeklyData[k]={
+    journal:f.journal.value, mood:ST._wMood||0,
+    reflection:f.reflection.value, water:ST._wWater||0,
+    meditation:ST._wMed||false, medMins:f.medmins?f.medmins.value:"",
+    exercise:f.exercise.value, exerciseDur:f.exdur?f.exdur.value:"",
+    ts:Date.now()
+  };
+  save("weeklyData"); alert("Weekly diary saved!"); renderDiaryPage();
+}
+function saveMonthly(){
+  const f=document.getElementById("mf"); if(!f) return;
+  const k=getMonthKey();
+  ST.monthlyData[k]={
+    reflection:f.reflection.value, wentWell:f.wentWell.value,
+    didntGoWell:f.didntGoWell.value, doDifferently:f.doDifferently.value,
+    mood:ST._mMood||0, highlight:f.highlight.value, ts:Date.now()
+  };
+  save("monthlyData"); alert("Monthly reflection saved!"); renderDiaryPage();
+}
+
+function renderDiaryPage(){
+  const k=getWeekKey(); const mk=getMonthKey();
+  const wd=ST.weeklyData[k]||{};
+  const md=ST.monthlyData[mk]||{};
+  ST._wMood=wd.mood||0; ST._wWater=wd.water||0; ST._wMed=wd.meditation||false;
+  ST._mMood=md.mood||0;
+
+  const wMoodBtns=MOODS.map((e,i)=>`<button class="face-btn${ST._wMood===i+1?" on":""}" onclick="ST._wMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
+  const mMoodBtns=MOODS.map((e,i)=>`<button class="face-btn${ST._mMood===i+1?" on":""}" onclick="ST._mMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
+  const wDrops=[1,2,3,4,5,6,7,8].map(i=>`<div class="w-drop${ST._wWater>=i?" on":""}" onclick="ST._wWater=${i};renderDiaryPage()">💧</div>`).join("");
+  const medTogs=`<div class="toggle-row"><button class="tog${ST._wMed?" on":""}" onclick="ST._wMed=true;renderDiaryPage()">Yes</button><button class="tog${!ST._wMed?" on":""}" onclick="ST._wMed=false;renderDiaryPage()">No</button></div>`;
+
+  const weeklyForm=`
+  <div class="card">
+    <div class="card-title">This Week's Wellness Journal</div>
+    <form id="wf" onsubmit="event.preventDefault();saveWeekly()">
+      <div class="field"><label>Journal — write freely about your week</label><textarea name="journal" style="min-height:130px" placeholder="How has this week been? What's on your mind?">${wd.journal||""}</textarea></div>
+      <div class="field"><label>Overall mood this week</label><div class="mood-faces">${wMoodBtns}</div></div>
+      <div class="field"><label>Weekly reflection — what stood out?</label><textarea name="reflection" placeholder="Any patterns, wins, challenges...">${wd.reflection||""}</textarea></div>
+      <div class="field"><label>Glasses of water per day (avg)</label><div class="water-track">${wDrops}</div></div>
+      <div class="field"><label>Did you meditate this week?</label>${medTogs}</div>
+      ${ST._wMed?`<div class="field"><label>Meditation minutes (total)</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`:`<input type="hidden" name="medmins"/>`}
+      <div class="field"><label>Exercise / movement this week</label><textarea name="exercise" placeholder="Types of exercise, how many times, how you felt..." style="min-height:80px">${wd.exercise||""}</textarea></div>
+      <div class="field"><label>Exercise duration this week (mins)</label><input type="number" name="exdur" placeholder="e.g. 120" value="${wd.exerciseDur||""}"/></div>
+      <button type="submit" class="btn btn-pri btn-full">Save This Week's Entry</button>
+    </form>
+  </div>`;
+
+  const monthlyForm=`
+  <div class="card">
+    <div class="card-title">Monthly Reflection</div>
+    <form id="mf" onsubmit="event.preventDefault();saveMonthly()">
+      <div class="field"><label>How do I feel about this month overall?</label><div class="mood-faces">${mMoodBtns}</div></div>
+      <div class="field"><label>Monthly reflection — looking back on this month</label><textarea name="reflection" style="min-height:120px" placeholder="What has this month been like for you?">${md.reflection||""}</textarea></div>
+      <div class="field"><label>What went well this month?</label><textarea name="wentWell" placeholder="Wins, achievements, things you are proud of...">${md.wentWell||""}</textarea></div>
+      <div class="field"><label>What didn't go so well?</label><textarea name="didntGoWell" placeholder="Challenges, setbacks, things that were hard...">${md.didntGoWell||""}</textarea></div>
+      <div class="field"><label>What would I do differently next month?</label><textarea name="doDifferently" placeholder="Changes to make, habits to build or drop...">${md.doDifferently||""}</textarea></div>
+      <div class="field"><label>My highlight of this month</label><textarea name="highlight" placeholder="The single best moment or thing you want to remember..." style="min-height:80px">${md.highlight||""}</textarea></div>
+      <button type="submit" class="btn btn-pri btn-full">Save Monthly Reflection</button>
+    </form>
+  </div>`;
+
+  const tabBtns=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem">
+    <button class="th-btn${ST.diaryTab==="weekly"?" on":""}" onclick="ST.diaryTab='weekly';renderDiaryPage()">Weekly Journal</button>
+    <button class="th-btn${ST.diaryTab==="monthly"?" on":""}" onclick="ST.diaryTab='monthly';renderDiaryPage()">Monthly Reflection</button>
+  </div>`;
+
+  document.getElementById("s-diary").innerHTML=`
+  <div class="top"><h2>Wellness Diary</h2><div class="top-sub">Journal, reflect, grow</div></div>
+  ${tabBtns}
+  ${ST.diaryTab==="weekly"?weeklyForm:monthlyForm}
+  <div class="pnote"><div class="pnote-lbl">Pharmacist's Note</div><div class="pnote-txt">${ST.diaryTab==="weekly"?"Regular journalling reduces cortisol and anxiety (Frontiers in Psychology). Even 5 minutes a day has measurable benefits on mood and mental clarity. Tracking water and exercise helps identify patterns that affect your sleep and energy.":"Monthly reflection builds self-awareness that goes beyond daily habits. Research shows that identifying what went well builds resilience, while identifying what to do differently supports positive behaviour change. Be kind to yourself in both columns."}</div></div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  LEARN
+// ═══════════════════════════════════════════════
+function renderLearnPage(){
+  document.getElementById("s-learn").innerHTML=`
+  <div class="top"><h2>Learn</h2><div class="top-sub">Pharmacist-written health articles</div></div>
+  <div class="pnote"><div class="pnote-lbl">About this section</div><div class="pnote-txt">All articles are written by a GPhC-registered pharmacist and based on current clinical evidence. New articles are added regularly.</div></div>
+  ${ARTS.map(a=>`<div class="art-card" onclick="openArticle('${a.id}')">
+    <div class="art-thumb" style="background:${a.bg}">${a.icon}</div>
+    <div class="art-body">
+      <div class="art-cat">${a.cat}</div>
+      <div class="art-title">${a.title}</div>
+      <div class="art-prev">${a.prev}</div>
+    </div>
+  </div>`).join("")}`;
+}
+
+function renderArticle(){
+  const a=ARTS.find(x=>x.id===ST.articleId); if(!a){go("learn");return;}
+  document.getElementById("s-article").innerHTML=`
+  <button class="btn-back" onclick="go('learn')">&#8592; Back to Learn</button>
+  <div style="padding:0 1rem">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+      <div style="width:56px;height:56px;background:${a.bg};border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0">${a.icon}</div>
+      <div><div class="cat-badge">${a.cat}</div><h2 style="font-size:1.45rem;margin-top:.25rem">${a.title}</h2></div>
+    </div>
+  </div>
+  <div class="pnote"><div class="pnote-lbl">Pharmacist's Note</div><div class="pnote-txt">${a.pnote}</div></div>
+  <div class="art-full" style="padding:0 1rem 1rem">${a.secs.map(s=>`<h3>${s.h}</h3><p>${s.p}</p>`).join("")}</div>
+  <div class="card-sm"><div style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--acc2);margin-bottom:.25rem">Sources</div><div style="font-size:.75rem;color:var(--txt2);line-height:1.65">${a.refs}</div></div>
+  <div style="height:1rem"></div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  CONTACT
+// ═══════════════════════════════════════════════
+function renderContactPage(){
+  document.getElementById("s-contact").innerHTML=`
+  <div class="top"><h2>Contact Us</h2><div class="top-sub">We are here to help</div></div>
+  <div class="contact-wrap">
+    <div class="pnote" style="margin:0 0 1rem"><div class="pnote-lbl">Get in touch</div><div class="pnote-txt">Whether you have a question about our products, want to enquire about a pharmacist consultation, or simply want to say hello — we would love to hear from you. We aim to respond within 24 hours.</div></div>
+    <div class="contact-item">
+      <div class="ci-icon">&#9993;</div>
+      <div>
+        <div class="ci-lbl">Email us</div>
+        <div class="ci-val"><a href="mailto:thewellnessscriptedu@gmail.com" style="color:var(--pri)">thewellnessscriptedu@gmail.com</a></div>
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="ci-icon">&#127760;</div>
+      <div>
+        <div class="ci-lbl">Website</div>
+        <div class="ci-val">thewellnessscript.co.uk</div>
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="ci-icon">&#128241;</div>
+      <div>
+        <div class="ci-lbl">TikTok / Instagram</div>
+        <div class="ci-val">@thewellnessscript</div>
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="ci-icon">&#128138;</div>
+      <div>
+        <div class="ci-lbl">Consultations</div>
+        <div class="ci-val">Coming soon — join the waitlist at our website</div>
+      </div>
+    </div>
+    <div class="card-sm" style="margin:1rem 0">
+      <div style="font-size:.72rem;font-weight:500;color:var(--txt);margin-bottom:.4rem">Important</div>
+      <div style="font-size:.78rem;line-height:1.7;color:var(--txt2)">This app provides general wellness tracking and pharmacist-written health information. It does not constitute medical advice, diagnosis or treatment. Always consult your GP or healthcare professional for medical concerns. In an emergency call 999.</div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  HOME PAGE
+// ═══════════════════════════════════════════════
+function renderHome(){
+  const sleepCount=Object.keys(ST.sleepData).length;
+  const bpCount=Object.values(ST.bpData).reduce((a,e)=>a+e.length,0);
+  const diaryCount=Object.keys(ST.weeklyData).length;
+  document.getElementById("s-home").innerHTML=`
+  <div class="home-hero">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="home-greet">${greet()}</div>
+        <div class="home-title">Your <em>Wellness Script</em><br>at a glance</div>
+      </div>
+      <button onclick="logout()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:20px;padding:.35rem .8rem;font-size:.68rem;letter-spacing:.06em;cursor:pointer;margin-top:.25rem">Sign out</button>
+    </div>
+  </div>
+  <div class="theme-bar">
+    <button class="th-btn${ST.theme==="cream"?" on":""}" data-t="cream" onclick="setTheme('cream')">Cream</button>
+    <button class="th-btn${ST.theme==="dark"?" on":""}" data-t="dark" onclick="setTheme('dark')">Dark</button>
+    <button class="th-btn${ST.theme==="sage"?" on":""}" data-t="sage" onclick="setTheme('sage')">Sage</button>
+    <button class="th-btn${ST.theme==="blush"?" on":""}" data-t="blush" onclick="setTheme('blush')">Blush</button>
+  </div>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-num">${sleepCount}</div><div class="stat-lbl">Sleep entries</div></div>
+    <div class="stat-card"><div class="stat-num">${bpCount}</div><div class="stat-lbl">BP readings</div></div>
+    <div class="stat-card"><div class="stat-num">${diaryCount}</div><div class="stat-lbl">Diary weeks</div></div>
+  </div>
+  <p class="sec-lbl">Quick Access</p>
+  <div class="shortcut-grid">
+    <div class="sc" onclick="go('sleep')"><div class="sc-icon">&#128164;</div><div class="sc-name">Sleep Tracker</div><div class="sc-sub">Log, rate & review</div></div>
+    <div class="sc" onclick="go('bp')"><div class="sc-icon">&#129658;</div><div class="sc-name">Blood Pressure</div><div class="sc-sub">Track readings & trends</div></div>
+    <div class="sc" onclick="go('diary')"><div class="sc-icon">&#128214;</div><div class="sc-name">Wellness Diary</div><div class="sc-sub">Weekly & monthly journal</div></div>
+    <div class="sc" onclick="go('learn')"><div class="sc-icon">&#127981;</div><div class="sc-name">Learn</div><div class="sc-sub">${ARTS.length} pharmacist articles</div></div>
+  </div>
+  <div class="pnote"><div class="pnote-lbl">&#128138; Pharmacist's Daily Tip</div><div class="pnote-txt">Consistency is the most powerful wellness tool you have. Same sleep time, same wake time, same medication schedule — your body thrives on rhythm. Small daily habits compound into significant health changes over time.</div></div>
+  <div style="padding:.5rem 1rem 0;font-size:.65rem;color:var(--txt3);line-height:1.6;text-align:center">This app is for wellness tracking only and does not constitute medical advice. Always consult your GP for health concerns. In an emergency call 999.</div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER ROUTER
+// ═══════════════════════════════════════════════
+function render(){
+  if(ST.page==="home")    renderHome();
+  if(ST.page==="sleep")   renderSleepPage();
+  if(ST.page==="bp")      renderBPPage();
+  if(ST.page==="diary")   renderDiaryPage();
+  if(ST.page==="learn")   renderLearnPage();
+  if(ST.page==="contact") renderContactPage();
+}
+
+// ═══════════════════════════════════════════════
+//  PAYWALL — change ACCESS_CODES to add/remove codes
+//  Each customer can have their own unique code
+//  Format: "CODE": "Customer name or email (optional)"
+// ═══════════════════════════════════════════════
+const ACCESS_CODES = {
+  "TWS2026":    "General access",
+  "WELLNESS1":  "Customer access",
+  "SLEEP2026":  "Customer access",
+  "SCRIPT2026": "Customer access",
+  "HEALTH2026": "Customer access",
+};
+
+function checkCode(){
+  const code = document.getElementById("gate-code").value.trim().toUpperCase();
+  const err  = document.getElementById("gate-err");
+  if(ACCESS_CODES[code]){
+    localStorage.setItem("tws_access", code);
+    document.getElementById("gate").classList.add("hidden");
+    setTimeout(()=>document.getElementById("gate").style.display="none", 400);
+    err.classList.remove("show");
+    render();
+  } else {
+    err.classList.add("show");
+    document.getElementById("gate-code").value="";
+    document.getElementById("gate-code").focus();
+  }
+}
+
+function checkAccess(){
+  const saved = localStorage.getItem("tws_access");
+  if(saved && ACCESS_CODES[saved.toUpperCase()]){
+    document.getElementById("gate").style.display = "none";
+    return true;
+  }
+  return false;
+}
+
+function logout(){
+  localStorage.removeItem("tws_access");
+  location.reload();
+}
+
+// ── INIT ──
+setTheme(ST.theme);
+if(checkAccess()){
+  render();
+}
+</script>
+</body>
+</html>
