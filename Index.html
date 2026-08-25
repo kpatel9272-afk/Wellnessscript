@@ -9,9 +9,10 @@
 <meta property="og:title" content="The Wellness Script — Pharmacist-Led Sleep & Wellbeing"/>
 <meta property="og:description" content="Can't sleep? There's a pharmacist for that. Clinically designed wellness tools and pharmacist-led sleep consultations."/>
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="https://thewellnessscript.co.uk"/>
+<meta property="og:url" content="https://wellnessscript.org"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://wellnessscript.org"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -287,12 +288,12 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
 <nav>
   <a href="#" class="nav-logo">The Wellness <span>Script</span></a>
   <ul class="nav-links">
-    <li><a href="#services">Services</a></li>
-    <li><a href="#products">Shop</a></li>
+    <li><a href="#sleep">Sleep</a></li>
+    <li><a href="#bloodpressure">Blood Pressure</a></li>
+    <li><a href="#wellness">Wellness</a></li>
     <li><a href="#app">App</a></li>
     <li><a href="#about">About</a></li>
-    <li><a href="#how">How it Works</a></li>
-    <li><a href="#consult" class="nav-book">Coming Soon</a></li>
+    <li><a href="#consult" class="nav-book">Consultations</a></li>
   </ul>
 </nav>
 
@@ -347,7 +348,7 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
           <span class="hero-card-price">£5.00</span>
         </div>
         <div class="hero-card-row">
-          <span class="hero-card-item">Pharmacist Consultation</span>
+          <span class="hero-card-item">Education & Wellness Consultation</span>
           <span class="hero-card-price">£39</span>
         </div>
         <div class="hero-card-row">
@@ -449,14 +450,14 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
       <div class="service-tier">Consultation</div>
       <div class="coming-soon-badge">Coming Soon</div>
       <div class="service-price">£39</div>
-      <div class="service-name">General Pharmacist Consultation</div>
+      <div class="service-name">Education & Wellness Consultation</div>
       <div class="service-format">30 mins · Video or WhatsApp</div>
       <ul class="service-includes">
-        <li>Medication & wellness questions</li>
-        <li>Lifestyle & wellbeing discussion</li>
-        <li>Supplement advice</li>
-        <li>Personalised recommendations</li>
+        <li>General wellness & lifestyle questions</li>
+        <li>Supplement education</li>
+        <li>Personalised wellness recommendations</li>
         <li>Written summary afterwards</li>
+        <li>Educational only — not a clinical medication review</li>
       </ul>
       <button class="service-cta" onclick="window.location='#consult'">Join Waitlist</button>
     </div>
@@ -580,7 +581,10 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
     <h2>Pharmacist-designed wellness tools</h2>
     <p>Beautifully designed, clinically grounded. Print at home, use forever.</p>
   </div>
-  <div class="products-grid reveal">
+
+  <div id="sleep" style="scroll-margin-top:90px"></div>
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--brown);text-align:center;margin-bottom:1.2rem">Sleep</h3>
+  <div class="products-grid reveal" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));max-width:700px;margin-bottom:3rem">
     <div class="product-card">
       <div class="product-thumb thumb-1">💤</div>
       <div class="product-body">
@@ -589,22 +593,44 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
         <p class="product-desc">31-day log covering sleep quality, bedtime, mood on waking, medications and pattern notes.</p>
         <div class="product-footer">
           <span class="product-price">£3.50</span>
-          <a href="https://thewellnessscript.gumroad.com/l/Sleeptracker" target="_blank" class="product-btn">Buy Now</a>
+          <a href="https://wellnessscript.gumroad.com/l/Sleeptracker" target="_blank" class="product-btn">Buy Now</a>
         </div>
       </div>
     </div>
+    <div class="product-card">
+      <div class="product-thumb thumb-1">🌙</div>
+      <div class="product-body">
+        <div class="product-cat">Consultation</div>
+        <div class="product-name">Pharmacist Sleep Consultation</div>
+        <p class="product-desc">45-min sleep assessment with a GPhC-registered pharmacist. Sleep Tracker included.</p>
+        <div class="product-footer">
+          <span class="product-price">£59</span>
+          <a href="#consult" class="product-btn">Join Waitlist</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bloodpressure" style="scroll-margin-top:90px"></div>
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--brown);text-align:center;margin-bottom:1.2rem">Blood Pressure</h3>
+  <div class="products-grid reveal" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));max-width:400px;margin-bottom:3rem">
     <div class="product-card">
       <div class="product-thumb thumb-2">🩺</div>
       <div class="product-body">
         <div class="product-cat">Health Log</div>
         <div class="product-name">Blood Pressure & Pulse Log</div>
-        <p class="product-desc">28 readings per month in GP-ready format. Colour-coded reference ranges included.</p>
+        <p class="product-desc">28 readings per month in GP-ready format. Colour-coded reference ranges included for your own awareness — this log does not diagnose or treat high blood pressure.</p>
         <div class="product-footer">
           <span class="product-price">£4.00</span>
-          <a href="https://thewellnessscript.gumroad.com/l/Bptracker" target="_blank" class="product-btn">Buy Now</a>
+          <a href="https://wellnessscript.gumroad.com/l/Bptracker" target="_blank" class="product-btn">Buy Now</a>
         </div>
       </div>
     </div>
+  </div>
+
+  <div id="wellness" style="scroll-margin-top:90px"></div>
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--brown);text-align:center;margin-bottom:1.2rem">Wellness</h3>
+  <div class="products-grid reveal" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));max-width:700px">
     <div class="product-card">
       <div class="product-thumb thumb-3">📋</div>
       <div class="product-body">
@@ -613,7 +639,7 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
         <p class="product-desc">Full page per day — sleep, mood, schedule, hydration, movement and daily reflection.</p>
         <div class="product-footer">
           <span class="product-price">£4.50</span>
-          <a href="https://thewellnessscript.gumroad.com/l/Weeklywellness" target="_blank" class="product-btn">Buy Now</a>
+          <a href="https://wellnessscript.gumroad.com/l/Weeklywellness" target="_blank" class="product-btn">Buy Now</a>
         </div>
       </div>
     </div>
@@ -625,11 +651,12 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
         <p class="product-desc">12-month planner with monthly reflection, mood ratings, positives, and goals for next month.</p>
         <div class="product-footer">
           <span class="product-price">£5.00</span>
-          <a href="https://thewellnessscript.gumroad.com/l/Monthlywellness" target="_blank" class="product-btn">Buy Now</a>
+          <a href="https://wellnessscript.gumroad.com/l/Monthlywellness" target="_blank" class="product-btn">Buy Now</a>
         </div>
       </div>
     </div>
   </div>
+  <p style="text-align:center;font-size:.78rem;color:var(--text-light);max-width:600px;margin:2rem auto 0">These tools are for personal wellness monitoring and information purposes only. They do not diagnose, treat or replace professional medical care. Always consult your GP or pharmacist about any health concern.</p>
 </section>
 
 <!-- APP SECTION -->
@@ -694,7 +721,7 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
       </div>
       <div class="app-feat">
         <div class="af-icon">🩺</div>
-        <div><div class="af-title">Blood Pressure Monitor</div><div class="af-desc">Track readings with NHS-standard flagging — automatically alerts you if readings are high and advises you to contact your GP.</div></div>
+        <div><div class="af-title">Blood Pressure Monitor</div><div class="af-desc">Track readings with flagging based on NICE guideline thresholds — highlights when a reading is elevated and suggests speaking to your GP. Not a substitute for clinical monitoring or diagnosis.</div></div>
       </div>
       <div class="app-feat">
         <div class="af-icon">📖</div>
@@ -711,8 +738,9 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
       <div class="app-price-note">One-off purchase<br>Lifetime access · Instant download<br>Works on iPhone & Android</div>
     </div>
 
-    <a href="https://thewellnessscript.gumroad.com" target="_blank" class="btn-primary" style="display:inline-block;margin-bottom:.75rem">Get the App — £9.99</a>
-    <p style="font-size:.74rem;color:var(--text-light);line-height:1.6">Installs to your home screen in under 60 seconds. No App Store. No subscription. Your data stays on your device.</p>
+    <a href="https://wellnessscript.gumroad.com/l/ueqgxg" target="_blank" class="btn-primary" style="display:inline-block;margin-bottom:.75rem">Get the App — £9.99</a>
+    <a href="app.html" style="display:block;font-size:.78rem;color:var(--brown-mid);text-decoration:underline;margin-bottom:.75rem">Already purchased? Open the app →</a>
+    <p style="font-size:.74rem;color:var(--text-light);line-height:1.6">Your personal access code is sent instantly after checkout. Installs to your home screen in under 60 seconds. No App Store. No subscription. All tracked data stays on your device — nothing is sent to our servers. This app is a wellness tracking and education tool; it does not diagnose or treat any condition and does not replace advice from your GP or pharmacist.</p>
   </div>
 </section>
 
@@ -722,31 +750,19 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
     <span>Consultations</span>
   </div>
   <h2 class="reveal">Pharmacist consultations<br><em>launching soon.</em></h2>
-  <p class="consult-soon-text reveal">Join the waitlist to be first to book — and receive an exclusive early-bird discount when we launch.</p>
+  <p class="consult-soon-text reveal">See pricing and what's included for each consultation above — join the waitlist to be first to book, and receive an exclusive early-bird discount when we launch.</p>
 
-  <div class="consult-soon-cards reveal">
-    <div class="consult-soon-card">
-      <div class="cscard-price">£39</div>
-      <div class="cscard-name">General Pharmacist Consultation</div>
-      <div class="cscard-detail">30 mins · Medication & wellness questions · Written summary</div>
-    </div>
-    <div class="consult-soon-card" style="border-color:rgba(242,196,160,.4);background:rgba(242,196,160,.08)">
-      <div class="cscard-price">£59</div>
-      <div class="cscard-name">Pharmacist Sleep Consultation</div>
-      <div class="cscard-detail">45 mins · Full sleep assessment · Sleep Tracker included · Written sleep plan</div>
-    </div>
-    <div class="consult-soon-card">
-      <div class="cscard-price">£99</div>
-      <div class="cscard-name">Sleep Reset Package</div>
-      <div class="cscard-detail">Initial consultation + 30-Night Protocol + diary review + follow-up</div>
-    </div>
-  </div>
-
-  <form class="notify-form reveal" name="waitlist" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/success">
+  <form class="notify-form reveal" name="waitlist" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/success" style="flex-direction:column;align-items:stretch;gap:.6rem">
     <input type="hidden" name="form-name" value="waitlist"/>
     <input type="hidden" name="bot-field" style="display:none"/>
-    <input type="email" name="email" placeholder="your@email.com" required/>
-    <button type="submit" class="btn-primary">Notify Me</button>
+    <div style="display:flex;gap:.8rem">
+      <input type="email" name="email" placeholder="your@email.com" required style="flex:1"/>
+      <button type="submit" class="btn-primary">Notify Me</button>
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:.5rem;font-size:.72rem;color:rgba(251,243,236,.5);text-align:left">
+      <input type="checkbox" name="consent" required style="margin-top:.2rem"/>
+      <span>I agree to receive email updates from The Wellness Script and to the <a href="privacy-policy.html" style="text-decoration:underline;color:rgba(251,243,236,.7)">Privacy Policy</a>. You can unsubscribe at any time.</span>
+    </label>
   </form>
   <p class="notify-note reveal">No spam. Unsubscribe any time. Early-bird discount for waitlist members.</p>
 </section>
@@ -766,7 +782,7 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
       <h5>Services</h5>
       <ul>
         <li><a href="#services">Sleep Consultation — £59</a></li>
-        <li><a href="#services">Pharmacist Consult — £39</a></li>
+        <li><a href="#services">Education & Wellness Consultation — £39</a></li>
         <li><a href="#services">Sleep Reset — £99</a></li>
         <li><a href="#consult">Join Waitlist</a></li>
       </ul>
@@ -786,8 +802,8 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
       <ul>
         <li><a href="mailto:thewellnessscriptedu@gmail.com">Email Us</a></li>
         <li><a href="#about">About</a></li>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms of Use</a></li>
+        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Use</a></li>
       </ul>
     </div>
   </div>
@@ -795,7 +811,7 @@ footer{background:var(--brown);border-top:1px solid rgba(242,196,160,.1);padding
     <span>© 2026 The Wellness Script. All rights reserved.</span>
     <span>thewellnessscriptedu@gmail.com</span>
   </div>
-  <p class="footer-disclaimer">The Wellness Script is an advisory service provided by a GPhC-registered pharmacist. Our consultations do not constitute a clinical medication review, diagnosis or prescription. This service does not replace the advice of your GP or other healthcare professional. Always consult a qualified medical practitioner for clinical decisions.</p>
+  <p class="footer-disclaimer">The Wellness Script is an education and wellness advisory service provided by a GPhC-registered pharmacist. Our consultations, digital products and app are for general information and wellness purposes only. They do not constitute a clinical medication review, diagnosis, prescription or emergency medical service, and do not replace the advice of your GP or other qualified healthcare professional. If you are experiencing a medical emergency, call 999. For urgent but non-emergency concerns, call NHS 111. See our <a href="privacy-policy.html" style="text-decoration:underline">Privacy Policy</a> and <a href="terms.html" style="text-decoration:underline">Terms of Use</a> for details on data handling, purchases and consultation terms.</p>
 </footer>
 
 <script>
