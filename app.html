@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="theme-color" content="#3E2009"/>
+<title>The Wellness Script — Pharmacist Wellness App</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+h1,h2,h3,h4{font-family:"Cormorant Garamond",serif;font-weight:400;line-height:1.15}
+button{cursor:pointer;font-family:"DM Sans",sans-serif;border:none;outline:none}
+input,textarea,select{font-family:"DM Sans",sans-serif;outline:none;border:none}
+
+/* ── THEMES ── */
+body.theme-cream{
+  --bg:#FBF3EC;--bg2:#F2E3D5;--bg3:#EDD9C4;
+  --pri:#3E2009;--pri2:#7A5438;--pri3:#A07050;
+  --acc:#F2C4A0;--acc2:#C49A7E;--acc3:#FDF0E6;
+  --card:#FFFFFF;--txt:#3E2009;--txt2:#7A5438;--txt3:#A07868;
+  --border:#EDD9C4;--nav:#3E2009;--nav-txt:#FBF3EC;--nav-acc:#F2C4A0;
+}
+body.theme-dark{
+  --bg:#130B04;--bg2:#1E1008;--bg3:#2A160A;
+  --pri:#F2C4A0;--pri2:#C49A7E;--pri3:#A07858;
+  --acc:#F2C4A0;--acc2:#C49A7E;--acc3:#2A160A;
+  --card:#221208;--txt:#FBF3EC;--txt2:#C49A7E;--txt3:#A07858;
+  --border:#3A200E;--nav:#0A0602;--nav-txt:#FBF3EC;--nav-acc:#F2C4A0;
+}
+body.theme-sage{
+  --bg:#F0F5F1;--bg2:#E0EDE2;--bg3:#D0E4D2;
+  --pri:#1E3D20;--pri2:#3A6B3C;--pri3:#5A9A5C;
+  --acc:#7BBF7E;--acc2:#5A9A5C;--acc3:#E8F5E9;
+  --card:#FFFFFF;--txt:#1E3D20;--txt2:#3A6B3C;--txt3:#5A9A5C;
+  --border:#C8E0CA;--nav:#1E3D20;--nav-txt:#FFFFFF;--nav-acc:#7BBF7E;
+}
+body.theme-blush{
+  --bg:#FEF0F4;--bg2:#FDE0EA;--bg3:#FCCDE0;
+  --pri:#6B1828;--pri2:#A03050;--pri3:#CC5070;
+  --acc:#F090B0;--acc2:#D06090;--acc3:#FEE8F0;
+  --card:#FFFFFF;--txt:#6B1828;--txt2:#A03050;--txt3:#CC5070;
+  --border:#FCCDE0;--nav:#6B1828;--nav-txt:#FFFFFF;--nav-acc:#F090B0;
+}
+
+/* ── LAYOUT ── */
+body{font-family:"DM Sans",sans-serif;font-weight:300;font-size:16px;color:var(--txt);background:var(--bg);transition:background .3s,color .3s}
+#app{height:100dvh;display:flex;flex-direction:column}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;display:none}
+.screen.active{display:block}
+
+/* ── NAV ── */
+nav{height:68px;background:var(--nav);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:flex-start;padding-top:6px;flex-shrink:0;position:relative;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;background:none;color:var(--nav-txt);opacity:.4;transition:opacity .2s}
+.nav-btn.on{opacity:1}
+.nav-icon{font-size:1.25rem;line-height:1}
+.nav-lbl{font-size:.56rem;letter-spacing:.06em;text-transform:uppercase}
+
+/* ── TOP BARS ── */
+.top{background:var(--pri);padding:1rem 1.25rem .75rem;position:sticky;top:0;z-index:50}
+.top h2{font-size:1.4rem;color:var(--nav-txt);font-family:"Cormorant Garamond",serif;font-weight:500}
+.top-sub{font-size:.66rem;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-top:.15rem}
+
+/* ── THEME SWITCHER ── */
+.theme-bar{display:flex;gap:.5rem;padding:.75rem 1rem;overflow-x:auto;scrollbar-width:none}
+.theme-bar::-webkit-scrollbar{display:none}
+.th-btn{padding:.45rem 1rem;border-radius:40px;font-size:.72rem;letter-spacing:.06em;white-space:nowrap;border:1.5px solid var(--border);background:var(--card);color:var(--txt2);transition:all .2s;flex-shrink:0}
+.th-btn.on{background:var(--pri);color:var(--nav-txt);border-color:var(--pri)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:18px;padding:1.25rem;margin:.65rem 1rem;border:1px solid var(--border);transition:background .3s,border .3s}
+.card-sm{background:var(--acc3);border-radius:14px;padding:.9rem 1rem;margin:.5rem 1rem;border:1px solid var(--border)}
+.card-title{font-family:"Cormorant Garamond",serif;font-size:1.2rem;margin-bottom:.85rem;color:var(--txt)}
+.sec-lbl{padding:.7rem 1rem .2rem;font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2)}
+
+/* ── FORMS ── */
+.field{margin-bottom:.9rem}
+.field label{display:block;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:.35rem}
+.field input,.field textarea,.field select{
+  width:100%;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:.7rem .9rem;font-size:.88rem;color:var(--txt);transition:border-color .2s,background .3s
+}
+.field input:focus,.field textarea:focus{border-color:var(--acc2)}
+.field textarea{resize:vertical;min-height:90px;line-height:1.6}
+.field select{-webkit-appearance:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+
+/* ── RATING STARS ── */
+.stars{display:flex;gap:.4rem;margin-top:.3rem}
+.star{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);font-size:.85rem;font-weight:500;color:var(--txt2);display:flex;align-items:center;justify-content:center;transition:all .15s;cursor:pointer}
+.star.on{background:var(--pri);color:var(--nav-txt);border-color:var(--pri)}
+.emoji-row{display:flex;gap:.4rem;margin-top:.3rem;flex-wrap:wrap}
+.emj{width:44px;height:44px;border-radius:12px;background:var(--bg);border:1.5px solid var(--border);font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:all .15s;cursor:pointer}
+.emj.on{background:var(--acc3);border-color:var(--acc2);box-shadow:0 0 0 2px var(--acc2)}
+
+/* ── BUTTONS ── */
+.btn{padding:.78rem 1.4rem;border-radius:50px;font-size:.82rem;font-weight:500;letter-spacing:.04em;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;cursor:pointer}
+.btn-full{width:100%}
+.btn-pri{background:var(--pri);color:var(--nav-txt)}
+.btn-pri:hover{opacity:.88}
+.btn-ghost{background:var(--acc3);color:var(--pri);border:1px solid var(--border)}
+.btn-del{background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;font-size:.72rem;padding:.35rem .7rem;border-radius:8px}
+.btn-back{display:flex;align-items:center;gap:.4rem;font-size:.82rem;padding:1rem;background:none;border:none;cursor:pointer;color:var(--txt2)}
+
+/* ── CALENDAR ── */
+.cal-wrap{margin:.65rem 1rem;background:var(--card);border-radius:18px;padding:1.1rem;border:1px solid var(--border)}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
+.cal-nav h3{font-family:"Cormorant Garamond",serif;font-size:1.1rem;color:var(--txt)}
+.cal-nav-btn{background:var(--acc3);border:1px solid var(--border);border-radius:8px;padding:.3rem .7rem;font-size:.8rem;color:var(--txt2);cursor:pointer}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day-lbl{text-align:center;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);padding-bottom:.4rem}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--txt2);cursor:pointer;transition:all .15s;border:1px solid transparent}
+.cal-day.empty{background:transparent;cursor:default}
+.cal-day.today{border-color:var(--acc2)!important}
+.cal-day.has-data{color:white;font-weight:500}
+.cal-day.green{background:#4CAF50}.cal-day.yellow{background:#FFC107;color:#333}
+.cal-day.red{background:#F44336}.cal-day.blue-ok{background:#2196F3}
+.cal-day.blue-lo{background:#90CAF9;color:#333}.cal-day.orange{background:#FF9800}
+.cal-day:hover:not(.empty){transform:scale(1.08)}
+.cal-legend{display:flex;gap:.75rem;margin-top:.65rem;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:.3rem;font-size:.65rem;color:var(--txt2)}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── ENTRIES ── */
+.entry{background:var(--card);border-radius:14px;padding:1rem;margin:.4rem 1rem;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem}
+.ent-date{font-size:.65rem;color:var(--acc2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.2rem}
+.ent-val{font-family:"Cormorant Garamond",serif;font-size:1.25rem;color:var(--txt)}
+.ent-sub{font-size:.75rem;color:var(--txt2);margin-top:.2rem;line-height:1.5}
+.ent-diary{font-size:.78rem;color:var(--txt2);font-style:italic;margin-top:.4rem;padding:.5rem;background:var(--bg);border-radius:8px;line-height:1.6}
+
+/* ── BP FLAG ── */
+.bp-flag{border-radius:12px;padding:.8rem 1rem;margin:.5rem 1rem;border:1px solid transparent}
+.bp-flag.ok{background:#E8F5E9;border-color:#A5D6A7;color:#1B5E20}
+.bp-flag.low{background:#E3F2FD;border-color:#90CAF9;color:#0D47A1}
+.bp-flag.pre{background:#FFF9E6;border-color:#FFE082;color:#5D4037}
+.bp-flag.hi1{background:#FFF3E0;border-color:#FFCC80;color:#E65100}
+.bp-flag.hi2{background:#FFEBEE;border-color:#EF9A9A;color:#B71C1C}
+.bp-flag.crisis{background:#B71C1C;border-color:#B71C1C;color:white}
+.bp-flag-title{font-weight:600;font-size:.85rem;margin-bottom:.25rem}
+.bp-flag-msg{font-size:.78rem;line-height:1.65}
+
+/* ── PHARMACIST NOTE ── */
+.pnote{background:var(--pri);border-radius:14px;padding:1rem 1.1rem;margin:.65rem 1rem}
+.pnote-lbl{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--nav-acc);margin-bottom:.35rem}
+.pnote-txt{font-size:.8rem;line-height:1.7;color:rgba(255,255,255,.72)}
+
+/* ── INFO BOX ── */
+.info-box{border-radius:12px;padding:.75rem 1rem;margin:.5rem 1rem;background:var(--acc3);border:1px solid var(--border)}
+.info-box p{font-size:.76rem;line-height:1.65;color:var(--txt2)}
+
+/* ── DISCLAIMER ── */
+.disclaimer{background:var(--bg2);border-radius:12px;padding:.75rem 1rem;margin:.65rem 1rem;border-left:3px solid var(--acc2)}
+.disclaimer p{font-size:.74rem;line-height:1.65;color:var(--txt2)}
+
+/* ── HOME ── */
+.home-hero{background:var(--pri);padding:1.5rem 1.25rem 1.75rem}
+.home-greet{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:.3rem}
+.home-title{font-family:"Cormorant Garamond",serif;font-size:1.85rem;color:var(--nav-txt);line-height:1.2}
+.home-title em{font-style:italic;color:var(--nav-acc)}
+.home-usp{font-size:.8rem;color:rgba(255,255,255,.55);margin-top:.5rem;line-height:1.5}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin:.7rem 1rem}
+.stat-card{background:var(--card);border-radius:14px;padding:.85rem .7rem;text-align:center;border:1px solid var(--border)}
+.stat-num{font-family:"Cormorant Garamond",serif;font-size:1.6rem;color:var(--pri);line-height:1}
+.stat-lbl{font-size:.6rem;color:var(--txt2);margin-top:.2rem}
+.shortcut-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.5rem 1rem}
+.sc{background:var(--card);border-radius:16px;padding:1.1rem;border:1px solid var(--border);transition:transform .2s;cursor:pointer}
+.sc:hover{transform:translateY(-2px)}
+.sc-icon{font-size:1.4rem;margin-bottom:.4rem}
+.sc-name{font-family:"Cormorant Garamond",serif;font-size:1rem;color:var(--txt)}
+.sc-sub{font-size:.68rem;color:var(--txt2);margin-top:.1rem}
+
+/* ── ABOUT PHARMACIST ── */
+.about-hero{background:var(--pri);padding:2rem 1.25rem 1.5rem;text-align:center}
+.about-avatar{width:80px;height:80px;background:rgba(242,196,160,.2);border:2px solid rgba(242,196,160,.3);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:2rem}
+.about-name{font-family:"Cormorant Garamond",serif;font-size:1.5rem;color:var(--nav-txt);margin-bottom:.2rem}
+.about-title{font-size:.75rem;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase}
+.cred-row{display:flex;flex-direction:column;gap:.6rem;margin:.65rem 1rem}
+.cred-item{background:var(--card);border-radius:14px;padding:1rem;border:1px solid var(--border);display:flex;align-items:flex-start;gap:.85rem}
+.ci-icon{width:40px;height:40px;background:var(--acc3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.ci-title{font-weight:500;font-size:.88rem;color:var(--txt);margin-bottom:.2rem}
+.ci-desc{font-size:.78rem;line-height:1.6;color:var(--txt2)}
+.why-card{background:var(--pri);border-radius:16px;padding:1.25rem;margin:.65rem 1rem}
+.why-card h3{font-family:"Cormorant Garamond",serif;font-size:1.2rem;color:var(--nav-txt);margin-bottom:.6rem}
+.why-card p{font-size:.82rem;line-height:1.75;color:rgba(255,255,255,.65)}
+
+/* ── LEARN ── */
+.art-card{background:var(--card);border-radius:18px;margin:.6rem 1rem;border:1px solid var(--border);overflow:hidden;cursor:pointer}
+.art-thumb{height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem}
+.art-body{padding:1rem}
+.art-cat{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--acc2);margin-bottom:.3rem}
+.art-title{font-family:"Cormorant Garamond",serif;font-size:1.1rem;color:var(--txt);margin-bottom:.3rem;line-height:1.3}
+.art-prev{font-size:.78rem;line-height:1.55;color:var(--txt2)}
+.art-full h3{font-family:"Cormorant Garamond",serif;font-size:1.2rem;color:var(--txt);margin:1rem 0 .4rem}
+.art-full p{font-size:.84rem;line-height:1.8;color:var(--txt2);margin-bottom:.7rem}
+.art-full ul{padding-left:1.2rem;margin-bottom:.8rem}
+.art-full ul li{font-size:.83rem;line-height:1.7;color:var(--txt2);margin-bottom:.25rem}
+.cat-badge{display:inline-block;background:var(--acc3);color:var(--acc2);border-radius:20px;padding:.2rem .65rem;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase}
+
+/* ── DIARY ── */
+.mood-faces{display:flex;gap:.5rem;margin-top:.3rem;flex-wrap:wrap}
+.face-btn{width:46px;height:46px;border-radius:12px;background:var(--bg);border:1.5px solid var(--border);font-size:1.35rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.face-btn.on{background:var(--acc3);border-color:var(--acc2);transform:scale(1.1)}
+.water-track{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.35rem}
+.w-drop{width:36px;height:36px;border-radius:8px;background:var(--bg);border:1.5px solid var(--border);font-size:.95rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.w-drop.on{background:#BBDEFB;border-color:#64B5F6}
+.tog-row{display:flex;gap:.5rem;margin-top:.35rem}
+.tog{padding:.45rem 1rem;border-radius:30px;border:1.5px solid var(--border);background:var(--bg);font-size:.78rem;color:var(--txt2);cursor:pointer;transition:all .15s}
+.tog.on{background:var(--pri);color:var(--nav-txt);border-color:var(--pri)}
+
+/* ── CONTACT ── */
+.contact-item{display:flex;align-items:center;gap:.75rem;padding:1rem;background:var(--card);border-radius:14px;margin-bottom:.6rem;border:1px solid var(--border)}
+
+/* ── GATE ── */
+#gate{position:fixed;inset:0;z-index:999;background:var(--pri);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;transition:opacity .4s}
+#gate.hidden{opacity:0;pointer-events:none}
+.gate-brand{font-family:"Cormorant Garamond",serif;font-size:1.9rem;font-weight:600;color:var(--nav-txt);text-align:center;margin-bottom:.2rem}
+.gate-brand span{font-style:italic;color:var(--nav-acc)}
+.gate-sub{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);text-align:center;margin-bottom:.5rem}
+.gate-cred{font-size:.72rem;color:rgba(255,255,255,.45);text-align:center;margin-bottom:2rem}
+.gate-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:1.75rem;width:100%;max-width:380px}
+.gate-card h2{font-family:"Cormorant Garamond",serif;font-size:1.5rem;color:var(--nav-txt);margin-bottom:.35rem}
+.gate-card p{font-size:.8rem;line-height:1.7;color:rgba(255,255,255,.45);margin-bottom:1.4rem}
+.gate-input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:.85rem 1.1rem;font-size:1rem;color:var(--nav-txt);letter-spacing:.12em;text-align:center;margin-bottom:.7rem;font-family:"DM Sans",sans-serif}
+.gate-input::placeholder{color:rgba(255,255,255,.25);letter-spacing:.06em;font-size:.85rem}
+.gate-input:focus{border-color:var(--nav-acc);outline:none}
+.gate-btn{width:100%;padding:.88rem;border-radius:50px;font-family:"DM Sans",sans-serif;font-size:.86rem;font-weight:500;letter-spacing:.04em;cursor:pointer;border:none;transition:all .2s;margin-bottom:.55rem}
+.gate-btn-pri{background:var(--nav-acc);color:var(--pri)}
+.gate-btn-pri:hover{opacity:.88}
+.gate-btn-sec{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.55);font-size:.78rem}
+.gate-error{background:rgba(244,67,54,.18);border:1px solid rgba(244,67,54,.35);color:#FFCDD2;border-radius:10px;padding:.55rem .9rem;font-size:.76rem;text-align:center;margin-bottom:.7rem;display:none}
+.gate-error.show{display:block}
+.gate-divider{display:flex;align-items:center;gap:.75rem;margin:.6rem 0}
+.gate-divider span{font-size:.68rem;color:rgba(255,255,255,.22);white-space:nowrap}
+.gate-divider::before,.gate-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.1)}
+.gate-footer{margin-top:1.75rem;text-align:center;font-size:.65rem;color:rgba(255,255,255,.22);line-height:1.7;max-width:300px}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:2.5rem 1.5rem;color:var(--txt2)}
+.empty-icon{font-size:2rem;margin-bottom:.6rem}
+.empty h3{font-family:"Cormorant Garamond",serif;font-size:1.2rem;color:var(--txt);margin-bottom:.3rem}
+.empty p{font-size:.8rem;line-height:1.7}
+@media(max-width:360px){.stat-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body class="theme-cream">
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-brand">The Wellness <span>Script</span></div>
+  <div class="gate-sub">Pharmacist-Crafted Wellness App</div>
+  <div class="gate-cred">Designed by a GPhC Registered Pharmacist &middot; 12 Years Clinical Experience</div>
+  <div class="gate-card">
+    <h2>Welcome back</h2>
+    <p>Enter your personal access code to open your wellness app. You received this in your purchase confirmation email.</p>
+    <div class="gate-error" id="gate-err">Incorrect code. Please check your confirmation email or contact thewellnessscriptedu@gmail.com</div>
+    <input class="gate-input" id="gate-code" type="password" placeholder="Enter your access code" autocomplete="off" onkeydown="if(event.key==='Enter')checkCode()"/>
+    <button class="gate-btn gate-btn-pri" onclick="checkCode()">Enter App</button>
+    <div class="gate-divider"><span>Don&#8217;t have access yet?</span></div>
+    <button class="gate-btn gate-btn-sec" onclick="window.open('https://thewellnessscript.gumroad.com/l/ueqgxg','_blank')">Purchase Access &rarr; Gumroad</button>
+  </div>
+  <div class="gate-footer">
+    Your wellness data is stored locally in your browser on this device only.<br>
+    Need help? thewellnessscriptedu@gmail.com
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="s-home"    class="screen active"></div>
+  <div id="s-sleep"   class="screen"></div>
+  <div id="s-bp"      class="screen"></div>
+  <div id="s-diary"   class="screen"></div>
+  <div id="s-learn"   class="screen"></div>
+  <div id="s-about"   class="screen"></div>
+  <div id="s-article" class="screen"></div>
+  <nav>
+    <button class="nav-btn on"  onclick="go('home')">  <span class="nav-icon">&#127968;</span><span class="nav-lbl">Home</span></button>
+    <button class="nav-btn"     onclick="go('sleep')">  <span class="nav-icon">&#128164;</span><span class="nav-lbl">Sleep</span></button>
+    <button class="nav-btn"     onclick="go('bp')">     <span class="nav-icon">&#129658;</span><span class="nav-lbl">BP Log</span></button>
+    <button class="nav-btn"     onclick="go('diary')">  <span class="nav-icon">&#128214;</span><span class="nav-lbl">Diary</span></button>
+    <button class="nav-btn"     onclick="go('learn')">  <span class="nav-icon">&#127981;</span><span class="nav-lbl">Learn</span></button>
+    <button class="nav-btn"     onclick="go('about')">  <span class="nav-icon">&#128138;</span><span class="nav-lbl">About</span></button>
+  </nav>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  SECURITY — SHA-256 hashed access codes only
+//  Plain-text codes are NEVER stored here.
+//  To add a new code: hash it with SHA-256 and add below.
+//  Online tool: https://emn178.github.io/online-tools/sha256.html
+//  Codes are case-insensitive (input is uppercased before hashing).
+// ═══════════════════════════════════════════
+const CODE_HASHES = new Set([
+  "eed24d769d4bb35a5ca2e3ea9e12f188968c121c75e1e7baab258108c302a89f",
+  "5b7fb49c5360f1b89bffce631d8c342acc28785c496b95aa9701e96727e74791",
+  "f6e053c7d17f5b251c9e2ee7860419f737ed6c35aebacb16b08aecf0331cfd10",
+  "378566f405ce9a1d451df2c12ee7b7f64c39fbed97952b420700f0178d228ee6",
+  "6a2ca0d93b1276f30960d872368a4aed5cd6f65fb766b279bd76a74c5f207f78",
+]);
+
+async function sha256(msg){
+  const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+async function checkCode(){
+  const raw=document.getElementById("gate-code").value.trim().toUpperCase();
+  const err=document.getElementById("gate-err");
+  if(!raw){err.classList.add("show");return;}
+  const hash=await sha256(raw);
+  if(CODE_HASHES.has(hash)){
+    sessionStorage.setItem("tws_sess",hash);
+    document.getElementById("gate").classList.add("hidden");
+    setTimeout(()=>document.getElementById("gate").style.display="none",400);
+    err.classList.remove("show");
+    render();
+  } else {
+    err.classList.add("show");
+    document.getElementById("gate-code").value="";
+    document.getElementById("gate-code").focus();
+  }
+}
+
+function checkAccess(){
+  const saved=sessionStorage.getItem("tws_sess");
+  if(saved&&CODE_HASHES.has(saved)){
+    document.getElementById("gate").style.display="none";
+    return true;
+  }
+  return false;
+}
+
+function logout(){
+  sessionStorage.removeItem("tws_sess");
+  location.reload();
+}
+
+// ═══════════════════════════════════════════
+//  ARTICLES — reviewed for appropriate clinical framing
+// ═══════════════════════════════════════════
+const ARTS=[
+  {id:"sleep",cat:"Sleep",bg:"#FDF0E6",icon:"\u{1F4A4}",
+   title:"The Sleep You Deserve",
+   prev:"Good sleep isn't a luxury — it's one of the kindest things you can do for your body and mind.",
+   pnote:"If you think a medication might be affecting your sleep, have a chat with your pharmacist or GP before changing anything. Think of this article as a friendly starting point, not medical advice.",
+   secs:[
+     {h:"Why sleep matters so much",p:"Most of us feel it before we can explain it — the fog, the short fuse, the cravings. Sleep is when your body repairs itself, your brain files away the day's memories, and your hormones reset. NHS guidance suggests most adults need somewhere between 7 and 9 hours a night, though everyone's a little different. If you're regularly running on much less, it's worth mentioning to your GP."},
+     {h:"What's actually happening while you sleep",p:"Your night unfolds in cycles of roughly 90 minutes, dipping through deeper, restorative sleep and lighter, dream-rich REM sleep. You need a good few of these cycles to wake up feeling human. There's no need to obsess over the science — just know that both the deep and the dreamy stages are doing something useful."},
+     {h:"Small habits, real difference",p:"Going to bed and waking at similar times, keeping your room cool and dark, and giving yourself a screen-free wind-down before bed are simple, evidence-backed habits that tend to help. They won't fix everything overnight, but they're a gentle place to start. If sleep struggles persist, your GP can help look at what's underneath."},
+     {h:"When it's time to ask for help",p:"If poor sleep is really weighing on your day-to-day life, or you notice loud snoring, gasping, or feeling exhausted no matter how long you sleep, it's worth getting checked out. These can point to things like sleep apnoea, which deserve a proper look from your GP."},
+   ],
+   refs:"NHS Sleep Guidance \u00b7 Matthew Walker, Why We Sleep (2017) \u00b7 National Sleep Foundation",
+   disclaimer:"This article is here to inform and reassure, not to diagnose. Always check in with your GP or pharmacist about any ongoing sleep or health concerns."},
+
+  {id:"magnesium",cat:"Supplements",bg:"#EAF4EA",icon:"\u{1F33F}",
+   title:"Magnesium, Made Simple",
+   prev:"A quiet workhorse mineral involved in hundreds of things your body does every day.",
+   pnote:"Taking prescribed medication? Have a quick chat with your pharmacist before adding a magnesium supplement — it can interact with certain antibiotics, thyroid medicines and bone treatments. Supplements are a support, not a swap for treatment.",
+   secs:[
+     {h:"What it's quietly doing for you",p:"Magnesium plays a part in energy, muscle and nerve function, bone strength and healthy blood pressure. It's one of those minerals that works in the background until you don't have enough of it. Adults generally need around 270\u2013300mg a day, depending on sex."},
+     {h:"Who might want to keep an eye on their intake",p:"If your diet leans heavily on processed food, you're an older adult, you have a digestive condition, or you're on certain medications, your magnesium levels might run a little low. If that sounds like you, your GP can arrange a simple blood test."},
+     {h:"Where to find it naturally",p:"Leafy greens like spinach, nuts and seeds, beans and lentils, wholegrains, and yes — a little dark chocolate — are all good sources. A varied, colourful diet usually covers most people's needs."},
+     {h:"If you're considering a supplement",p:"Magnesium glycinate and citrate tend to be well tolerated and well absorbed; magnesium oxide less so. Your pharmacist can help you pick the right one for you. As a general guide, the UK safe upper limit for supplemental magnesium is 400mg a day."},
+   ],
+   refs:"NIH Magnesium Fact Sheet \u00b7 UK Expert Group on Vitamins & Minerals \u00b7 NHS",
+   disclaimer:"Supplements are there to support a good diet, not replace one — and not to replace medical treatment. Check with your pharmacist or GP before starting anything new, especially alongside prescribed medication."},
+
+  {id:"vitd",cat:"Supplements",bg:"#FFFBEA",icon:"\u2600\uFE0F",
+   title:"Vitamin D and Grey British Winters",
+   prev:"The NHS recommends a little extra vitamin D for most of us through the darker months.",
+   pnote:"The NHS and NICE suggest 10 micrograms (400 IU) of vitamin D daily for most adults from October to March, with some groups advised to take it year-round. Your GP or pharmacist can help you work out what's right for you.",
+   secs:[
+     {h:"Why our winters make a difference",p:"From October to March, there simply isn't enough strong sunlight in the UK for our skin to make adequate vitamin D on its own. That's why the NHS suggests most adults consider a daily 10 microgram (400 IU) vitamin D3 supplement over these months."},
+     {h:"Who might need it all year round",p:"If you're over 65, pregnant or breastfeeding, have darker skin, or tend to cover up or stay indoors, you may be advised to supplement year-round rather than just in winter. Worth a quick word with your GP or pharmacist if any of this sounds like you."},
+     {h:"What it's doing for you",p:"Vitamin D helps your body manage calcium and phosphate — the building blocks of strong bones and teeth — and plays a role in supporting your immune system too. Significant deficiency is serious and needs proper medical treatment."},
+     {h:"Choosing a supplement",p:"Vitamin D3 (cholecalciferol) is the most commonly recommended form, and it's best absorbed alongside a meal with a bit of fat in it. As a guide, the safe upper limit for adults is 4,000 IU (100 micrograms) a day — going higher isn't recommended without medical supervision."},
+   ],
+   refs:"NHS Vitamin D Guidance \u00b7 NICE PH56 (2025) \u00b7 SACN",
+   disclaimer:"This reflects current NHS guidance, but everyone's needs are a little different — your GP or pharmacist is the best person to advise on your own supplementation."},
+
+  {id:"b12",cat:"Supplements",bg:"#F0EBFF",icon:"\u{1F49C}",
+   title:"B12 — The Energy Vitamin",
+   prev:"Feeling wiped out for no obvious reason? B12 is worth knowing about.",
+   pnote:"If you suspect a B12 deficiency, please see your GP for a proper blood test rather than self-treating — B12 deficiency deserves an accurate diagnosis. NICE NG239 (March 2024) sets out the current clinical approach in the UK.",
+   secs:[
+     {h:"Why it matters",p:"B12 supports healthy red blood cells, nerve function and normal brain function. It's found naturally only in animal products — meat, fish, eggs, dairy — so if you eat a vegan or strictly vegetarian diet, it's worth thinking about supplementation."},
+     {h:"Who's more likely to run low",p:"Alongside vegans and vegetarians, this includes people over 60, anyone taking metformin for diabetes, people on long-term reflux medications like omeprazole, and those with a condition called pernicious anaemia. If any of this applies to you, ask your GP whether testing makes sense."},
+     {h:"Signs worth noticing",p:"Persistent tiredness, a sore or inflamed tongue, tingling or numbness in the hands and feet, brain fog, and low mood can all be linked to low B12 — though they overlap with plenty of other things too, which is exactly why a blood test matters. If you notice anything neurological, don't sit on it — see your GP promptly."},
+     {h:"What treatment looks like",p:"Depending on the cause, your GP might suggest dietary changes, oral supplements, or in some cases injections. NICE NG239 (March 2024) guides how healthcare professionals approach diagnosis and treatment."},
+   ],
+   refs:"NICE NG239 (March 2024) \u00b7 BNF \u00b7 NHS",
+   disclaimer:"B12 deficiency needs a proper diagnosis from your GP — this article is just a friendly primer. If something feels off, please get it checked."},
+
+  {id:"cortisol",cat:"Hormones",bg:"#FFF4E6",icon:"\u26A1",
+   title:"Stress, Cortisol & Feeling Human Again",
+   prev:"What's actually happening in your body when life feels like too much — and what genuinely helps.",
+   pnote:"If stress or anxiety is significantly affecting your day-to-day life, please talk to your GP or a mental health professional. Lifestyle habits can support you, but they're not a replacement for proper care.",
+   secs:[
+     {h:"What cortisol actually is",p:"Cortisol is your body's stress hormone, made by your adrenal glands. In the right amounts, it helps regulate things like blood pressure, blood sugar and your immune response — it naturally rises and falls over the course of a day."},
+     {h:"When stress overstays its welcome",p:"A short burst of stress is normal and even useful. But when stress sticks around for weeks or months, your body's alarm system can stay switched on longer than is helpful. The research here is nuanced, but chronic stress is consistently linked with feeling worse overall. If this sounds familiar, speaking to your GP is a good first step."},
+     {h:"What genuinely helps",p:"Movement, consistent sleep, mindfulness practices, and spending time with people who matter to you all have real evidence behind them for managing stress. None of these replace professional support when you need it — think of them as a good foundation."},
+     {h:"When to reach out",p:"If stress, anxiety or low mood is getting in the way of your life, work or relationships, please talk to your GP — effective support exists. Mind (mind.org.uk) is also a great resource. If you're ever in crisis, call 999 or the Samaritans on 116 123."},
+   ],
+   refs:"NHS Mental Health Guidance \u00b7 Psychoneuroendocrinology (2024) \u00b7 Mind UK",
+   disclaimer:"This article touches on stress and mental health. If you're struggling, please reach out to your GP or a mental health service. In a crisis, call 999 or the Samaritans on 116 123."},
+
+  {id:"anaemia",cat:"Health",bg:"#FEF0F0",icon:"\u{1FA78}",
+   title:"Running on Empty? It Might Be Anaemia",
+   prev:"One of the most common — and most missable — reasons for feeling constantly tired.",
+   pnote:"If anaemia crosses your mind, please see your GP for a blood test rather than guessing. Don't start iron supplements without a diagnosis — too much iron can cause harm. Chest pain, severe breathlessness or blood in your stool need urgent attention.",
+   secs:[
+     {h:"What's going on in your body",p:"Anaemia means you have fewer red blood cells, or less haemoglobin, than you need — which makes it harder for your blood to carry oxygen around your body. Iron deficiency is the most common cause in the UK."},
+     {h:"What it can feel like",p:"Persistent tiredness, getting breathless doing things that didn't used to bother you, looking a little pale, a racing heart, dizziness or trouble concentrating are all common signs. These overlap with lots of other things, which is exactly why a GP blood test is the way to know for sure."},
+     {h:"When it's urgent",p:"Chest pain, severe breathlessness at rest, blood in your stool or vomit, or fainting all need prompt medical attention — contact your GP urgently or call 111, and call 999 in an emergency."},
+     {h:"Getting back on track",p:"Treatment depends on the cause, and your GP will guide it — often iron supplements alongside finding out what's behind the deficiency in the first place. Please don't self-prescribe iron without a confirmed diagnosis."},
+   ],
+   refs:"NICE CKS Anaemia (2024) \u00b7 BSG Iron Deficiency Anaemia Guidelines 2025 \u00b7 NHS",
+   disclaimer:"If any of this sounds familiar, please see your GP. Don't start iron supplements without medical advice, and seek urgent help for chest pain, severe breathlessness or blood in your stool."},
+
+  {id:"bp",cat:"Health",bg:"#EEF2FF",icon:"\u{1FA7A}",
+   title:"Getting to Know Your Blood Pressure",
+   prev:"What the numbers actually mean, how to measure well, and when it's worth a chat with your GP.",
+   pnote:"This app can help you spot patterns in your readings, but it's not a substitute for medical assessment. Readings consistently above 140/90 mmHg are worth discussing with your GP. Readings above 180/120 mmHg with symptoms need urgent attention.",
+   secs:[
+     {h:"Reading your numbers",p:"Blood pressure comes as two numbers — systolic (when your heart beats) over diastolic (when it rests) — measured in mmHg. NICE guidance considers a clinic reading consistently above 140/90 mmHg (or 135/85 mmHg at home) to be high blood pressure."},
+     {h:"Getting an accurate reading",p:"Sit quietly for about five minutes first. Use a validated upper-arm monitor. Skip caffeine, exercise and smoking for half an hour beforehand, and try to measure at a similar time each day. One reading tells you very little — a pattern over time tells you much more."},
+     {h:"Everyday habits that help",p:"Regular movement, going easier on salt, keeping a healthy weight, and cutting back on alcohol and smoking are all genuinely linked to healthier blood pressure. They work alongside medical treatment, not instead of it."},
+     {h:"When to talk to your GP",p:"If your home readings are consistently above 135/85 mmHg, it's worth a conversation with your GP, who can properly assess and advise. Readings above 180/120 mmHg — especially with a severe headache, visual changes or chest pain — need urgent medical attention."},
+   ],
+   refs:"NICE NG136 \u00b7 British Heart Foundation \u00b7 British and Irish Hypertension Society",
+   disclaimer:"This tracker is here to help you notice patterns, not to diagnose or treat high blood pressure. Always check in with your GP about what your readings mean for you."},
+];
+
+// ═══════════════════════════════════════════
+//  STATE & STORAGE
+// ═══════════════════════════════════════════
+const ld=k=>{try{return JSON.parse(localStorage.getItem("tws_"+k)||"null")}catch{return null}};
+const sv=k=>{try{localStorage.setItem("tws_"+k,JSON.stringify(ST[k]))}catch{}};
+
+const ST={
+  page:"home",articleId:null,theme:ld("theme")||"cream",
+  diaryTab:"weekly",sleepView:"form",bpView:"form",
+  sleepMonth:new Date().toISOString().slice(0,7),
+  bpMonth:new Date().toISOString().slice(0,7),
+  sleepData:ld("sleep")||{},bpData:ld("bp")||{},
+  weeklyData:ld("weekly")||{},monthlyData:ld("monthly")||{},
+  _sleepQ:0,_sleepW:0,_wMood:0,_wWater:0,_wMed:false,_mMood:0,
+};
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+const today=()=>new Date().toISOString().slice(0,10);
+const nowT=()=>new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+const fmtD=d=>new Date(d+"T12:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
+const daysInMonth=(y,m)=>new Date(y,m,0).getDate();
+const firstDow=(y,m)=>{const d=new Date(y,m-1,1).getDay();return d===0?6:d-1};
+const MOODS=["\u{1F614}","\u{1F615}","\u{1F610}","\u{1F642}","\u{1F604}"];
+const WAKING=["\u{1F975}","\u{1F62C}","\u{1F610}","\u{1F60C}","\u{1F31F}"];
+function setTheme(t){ST.theme=t;sv("theme");document.body.className="theme-"+t;document.querySelectorAll(".th-btn").forEach(b=>b.classList.toggle("on",b.dataset.t===t));}
+
+function bpFlag(sys,dia){
+  if(!sys||!dia)return null;
+  if(sys>=180||dia>=120)return{cls:"crisis",title:"Very High Reading \u2014 Seek Urgent Help",msg:"This reading is very high. If you have symptoms such as severe headache, visual disturbance, chest pain or difficulty breathing, call 999 or go to A&E. Even without symptoms, contact your GP or call 111 today."};
+  if(sys>=160||dia>=100)return{cls:"hi2",title:"High Reading \u2014 Contact Your GP",msg:"This reading is above the range recommended by NICE. Please contact your GP to discuss your blood pressure. Do not stop any prescribed medications without medical advice."};
+  if(sys>=140||dia>=90)return{cls:"hi1",title:"Elevated Reading \u2014 Speak to Your GP",msg:"Home readings consistently above 135/85 mmHg should be discussed with your GP. This single reading does not diagnose high blood pressure \u2014 your GP can assess properly."};
+  if(sys>=130||dia>=85)return{cls:"pre",title:"Slightly Elevated",msg:"This reading is slightly above optimal. Continue monitoring and consider lifestyle factors such as salt intake, activity and stress. Discuss with your GP if readings remain consistently above this level."};
+  if(sys<90||dia<60)return{cls:"low",title:"Low Reading",msg:"If you feel dizzy, faint or lightheaded, sit or lie down and contact your GP or call 111. Single low readings in someone who feels well are not always a concern, but consistent low readings should be discussed with your GP."};
+  if(sys<=120&&dia<=80)return{cls:"ok",title:"Optimal Reading",msg:"This is an excellent blood pressure reading. Continue your current healthy habits."};
+  return{cls:"ok",title:"Normal Reading",msg:"This reading is within a normal range. Continue monitoring regularly."};
+}
+function bpCalColor(entries){
+  if(!entries||!entries.length)return null;
+  const avg=entries.reduce((a,e)=>a+e.sys,0)/entries.length;
+  if(avg>=160)return"red";if(avg>=140)return"orange";if(avg>=130)return"yellow";if(avg<90)return"blue-lo";return"green";
+}
+function sleepCalColor(e){if(!e||!e.quality)return null;return e.quality>=4?"green":e.quality===3?"yellow":"red";}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function go(page){
+  ST.page=page;ST.articleId=null;
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("on"));
+  document.getElementById("s-"+page).classList.add("active");
+  const nm={home:0,sleep:1,bp:2,diary:3,learn:4,about:5};
+  if(nm[page]!==undefined)document.querySelectorAll(".nav-btn")[nm[page]].classList.add("on");
+  render();
+}
+function openArticle(id){ST.articleId=id;document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById("s-article").classList.add("active");renderArticle();}
+function calNav(m){if(ST.page==="sleep")ST.sleepMonth=m;else ST.bpMonth=m;render();}
+function sleepDayClick(d){const e=ST.sleepData[d];if(!e)return;alert(fmtD(d)+"\n\nBedtime: "+e.bedtime+" \u2192 "+e.wake+"\nHours: "+e.hours+"h\nQuality: "+"\u2605".repeat(e.quality||0)+"\nWaking: "+(WAKING[e.waking-1]||"--")+"\nMeds: "+(e.meds||"Not noted")+"\nNotes: "+(e.other||"None")+"\n\nDiary entry: "+(e.diary||"No entry"));}
+function bpDayClick(d){const es=ST.bpData[d];if(!es||!es.length)return;alert(fmtD(d)+"\n\n"+es.map(e=>`${e.time||""} \u2014 ${e.sys}/${e.dia} mmHg, Pulse: ${e.pulse||"--"} bpm\n${e.arm||""} ${e.meds?"\nMeds: "+e.meds:""} ${e.notes?"\nNotes: "+e.notes:""}`).join("\n\n"));}
+
+function renderCal(monthStr,colorFn,legendHtml,dayClick){
+  const [y,m]=monthStr.split("-").map(Number);
+  const days=daysInMonth(y,m),first=firstDow(y,m);
+  const [ty,tm,td]=today().split("-").map(Number);
+  const lbls=["Mo","Tu","We","Th","Fr","Sa","Su"];
+  let cells=lbls.map(l=>`<div class="cal-day-lbl">${l}</div>`).join("");
+  for(let i=0;i<first;i++)cells+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const col=colorFn(ds);const isT=y===ty&&m===tm&&d===td;
+    cells+=`<div class="cal-day${col?" has-data "+col:""}${isT?" today":""}" onclick="${dayClick}('${ds}')">${d}</div>`;
+  }
+  const prev=m===1?`${y-1}-12`:`${y}-${String(m-1).padStart(2,"0")}`;
+  const next=m===12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,"0")}`;
+  const mName=new Date(y,m-1,1).toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+  return`<div class="cal-wrap"><div class="cal-nav"><button class="cal-nav-btn" onclick="calNav('${prev}')">&lt;</button><h3>${mName}</h3><button class="cal-nav-btn" onclick="calNav('${next}')">&gt;</button></div><div class="cal-grid">${cells}</div><div class="cal-legend">${legendHtml}</div></div>`;
+}
+
+// ═══════════════════════════════════════════
+//  SLEEP PAGE
+// ═══════════════════════════════════════════
+function sleepSetQ(v){ST._sleepQ=v;document.querySelectorAll(".sq").forEach((b,i)=>b.classList.toggle("on",i<v));}
+function sleepSetW(v){ST._sleepW=v;document.querySelectorAll(".sw").forEach((b,i)=>b.classList.toggle("on",i===v-1));}
+function submitSleep(){
+  const f=document.getElementById("slf");
+  ST.sleepData[today()]={date:today(),bedtime:f.bedtime.value||"--",wake:f.wake.value||"--",hours:parseFloat(f.hours.value)||0,quality:ST._sleepQ,waking:ST._sleepW,meds:f.meds.value,other:f.other.value,diary:f.diary.value,ts:Date.now()};
+  sv("sleepData");ST._sleepQ=0;ST._sleepW=0;renderSleepPage();
+}
+function delSleep(d){delete ST.sleepData[d];sv("sleepData");renderSleepPage();}
+function renderSleepPage(){
+  const qS=[1,2,3,4,5].map(i=>`<button class="star sq${ST._sleepQ>=i?" on":""}" onclick="sleepSetQ(${i})">${i}</button>`).join("");
+  const wE=WAKING.map((e,i)=>`<button class="emj sw${ST._sleepW===i+1?" on":""}" onclick="sleepSetW(${i+1})">${e}</button>`).join("");
+  const entries=Object.entries(ST.sleepData).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10)
+    .map(([d,e])=>`<div class="entry"><div><div class="ent-date">${fmtD(d)}</div><div class="ent-val">${e.hours}h &nbsp;${"\u2605".repeat(e.quality||0)}</div><div class="ent-sub">${e.bedtime} \u2192 ${e.wake}&nbsp;&nbsp;Waking: ${WAKING[e.waking-1]||"--"}</div>${e.meds?`<div class="ent-sub">Meds: ${e.meds}</div>`:""} ${e.other?`<div class="ent-sub">${e.other}</div>`:""} ${e.diary?`<div class="ent-diary">"${e.diary}"</div>`:""}</div><button class="btn-del" onclick="delSleep('${d}')">&#10005;</button></div>`).join("")||`<div class="empty"><div class="empty-icon">\u{1F4A4}</div><h3>No entries yet</h3><p>Log your first night above to begin tracking.</p></div>`;
+  const calLeg=`<div class="leg"><div class="leg-dot" style="background:#4CAF50"></div>Good (4\u20135)</div><div class="leg"><div class="leg-dot" style="background:#FFC107"></div>Average (3)</div><div class="leg"><div class="leg-dot" style="background:#F44336"></div>Poor (1\u20132)</div>`;
+  const views=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem">
+    <button class="th-btn${ST.sleepView==="form"?" on":""}" onclick="ST.sleepView='form';renderSleepPage()">Log Sleep</button>
+    <button class="th-btn${ST.sleepView==="cal"?" on":""}" onclick="ST.sleepView='cal';renderSleepPage()">Calendar</button>
+    <button class="th-btn${ST.sleepView==="log"?" on":""}" onclick="ST.sleepView='log';renderSleepPage()">History</button>
+  </div>`;
+  let main="";
+  if(ST.sleepView==="form") main=`
+  <div class="card"><div class="card-title">Log last night&#8217;s sleep</div>
+  <form id="slf" onsubmit="event.preventDefault();submitSleep()">
+    <div class="row2"><div class="field"><label>Bedtime</label><input type="time" name="bedtime"/></div><div class="field"><label>Wake time</label><input type="time" name="wake"/></div></div>
+    <div class="field"><label>Hours slept</label><input type="number" name="hours" min="0" max="24" step="0.5" placeholder="e.g. 7.5"/></div>
+    <div class="field"><label>Sleep quality &mdash; 1 poor, 5 excellent</label><div class="stars">${qS}</div></div>
+    <div class="field"><label>How do you feel on waking?</label><div class="emoji-row">${wE}</div></div>
+    <div class="field"><label>Medications taken last night?</label><select name="meds"><option value="">Select</option><option>Yes &mdash; all taken</option><option>Yes &mdash; some missed</option><option>No medications</option><option>New medication started</option></select></div>
+    <div class="field"><label>Other notes &mdash; anything affecting your sleep</label><textarea name="other" placeholder="Stress, caffeine, room temperature, noise..."></textarea></div>
+    <div class="field"><label>Sleep diary &mdash; journal your thoughts freely</label><textarea name="diary" style="min-height:120px" placeholder="How are you feeling? Worries, dreams, anything on your mind..."></textarea></div>
+    <button type="submit" class="btn btn-pri btn-full">Save Sleep Entry</button>
+  </form></div>
+  <div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Tracking your sleep over time helps identify patterns that a single night cannot reveal. If you notice consistent poor sleep that is affecting your daily life, speak to your GP &mdash; there may be an underlying cause worth investigating. Note: some common medications can affect sleep. Your pharmacist can advise.</div></div>
+  <div class="disclaimer"><p>This tracker is for personal wellness monitoring only. It does not constitute medical advice. If you have significant concerns about your sleep, please speak to your GP.</p></div>`;
+  else if(ST.sleepView==="cal") main=renderCal(ST.sleepMonth,d=>sleepCalColor(ST.sleepData[d]),calLeg,"sleepDayClick")+`<div class="info-box"><p>Tap any coloured day to see that night&#8217;s entry. Green = good sleep (4\u20135). Yellow = average (3). Red = poor (1\u20132).</p></div>`;
+  else main=`<p class="sec-lbl">Your Sleep History</p>${entries}`;
+  document.getElementById("s-sleep").innerHTML=`<div class="top"><h2>Sleep Tracker</h2><div class="top-sub">Log nightly &mdash; see your patterns</div></div>${views}${main}`;
+}
+
+// ═══════════════════════════════════════════
+//  BP PAGE
+// ═══════════════════════════════════════════
+function submitBP(){
+  const f=document.getElementById("bpf");
+  const sys=parseInt(f.sys.value),dia=parseInt(f.dia.value);
+  const entry={sys,dia,pulse:parseInt(f.pulse.value)||0,arm:f.arm.value,meds:f.meds.value,notes:f.notes.value,time:nowT(),ts:Date.now()};
+  if(!ST.bpData[today()])ST.bpData[today()]=[];
+  ST.bpData[today()].unshift(entry);sv("bpData");ST._bpFlag=bpFlag(sys,dia);renderBPPage();
+}
+function delBP(d,i){ST.bpData[d].splice(i,1);if(!ST.bpData[d].length)delete ST.bpData[d];sv("bpData");renderBPPage();}
+function renderBPPage(){
+  const flag=ST._bpFlag;
+  const flagHtml=flag?`<div class="bp-flag ${flag.cls}" style="margin:.5rem 1rem"><div class="bp-flag-title">${flag.title}</div><div class="bp-flag-msg">${flag.msg}</div></div>`:"";
+  const allE=Object.entries(ST.bpData).sort((a,b)=>a[0].localeCompare(b[0])).flatMap(([d,es])=>es.map(e=>({...e,d}))).slice(-14);
+  let chartHtml="";
+  if(allE.length>=2){
+    const sv2=allE.map(e=>e.sys),dv=allE.map(e=>e.dia);
+    const all=[...sv2,...dv],mx=Math.max(...all),mn=Math.min(...all),range=mx-mn||1;
+    const pw=310,ph=100,pad=10;
+    const mkP=(vals,c)=>{
+      const pts=vals.map((v,i)=>{const x=pad+i*(pw-pad*2)/(vals.length-1);const y=ph-pad-(v-mn)/range*(ph-pad*2);return x+","+y;}).join(" ");
+      const dots=vals.map((v,i)=>{const x=pad+i*(pw-pad*2)/(vals.length-1);const y=ph-pad-(v-mn)/range*(ph-pad*2);return`<circle cx="${x}" cy="${y}" r="3.5" fill="${c}"/>`;}).join("");
+      return`<polyline points="${pts}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round"/>${dots}`;
+    };
+    const target140y=ph-pad-(140-mn)/range*(ph-pad*2);
+    chartHtml=`<div class="card"><div class="card-title">Blood Pressure Trend</div><svg viewBox="0 0 320 110" style="width:100%;height:120px" preserveAspectRatio="none"><line x1="${pad}" y1="${target140y}" x2="${pw}" y2="${target140y}" stroke="#FFCC80" stroke-width="1" stroke-dasharray="4,3"/>${mkP(sv2,"#C49A7E")}${mkP(dv,"#F2C4A0")}</svg><div style="display:flex;gap:1rem;margin-top:.4rem;font-size:.68rem;color:var(--txt2)"><span style="display:flex;align-items:center;gap:.3rem"><span style="width:14px;height:3px;background:#C49A7E;display:inline-block;border-radius:2px"></span>Systolic</span><span style="display:flex;align-items:center;gap:.3rem"><span style="width:14px;height:3px;background:#F2C4A0;display:inline-block;border-radius:2px"></span>Diastolic</span><span style="display:flex;align-items:center;gap:.3rem"><span style="width:14px;height:3px;background:#FFCC80;display:inline-block;border-radius:2px;border:1px dashed #FFCC80"></span>140 mmHg</span></div></div>`;
+  }
+  const refCard=`<div class="card-sm"><div style="font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:.5rem">NICE NG136 Reference Ranges</div>${[["Optimal","< 120/80","#4CAF50"],["Normal","120\u2013129/80\u201384","#8BC34A"],["High-Normal","130\u2013139/85\u201389","#FFC107"],["High (Stage 1)","140\u2013159/90\u201399","#FF9800"],["High (Stage 2)","160\u2013179/100\u2013119","#F44336"],["Very High","\u2265180/\u2265120","#B71C1C"]].map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid var(--border)"><span style="display:flex;align-items:center;gap:.5rem"><span style="width:9px;height:9px;background:${c};border-radius:50%;display:inline-block"></span><span style="font-size:.76rem">${l}</span></span><span style="font-size:.72rem;color:var(--txt2)">${v} mmHg</span></div>`).join("")}<div style="font-size:.6rem;color:var(--txt3);margin-top:.4rem">Source: NICE NG136 / British and Irish Hypertension Society</div></div>`;
+  const log=Object.entries(ST.bpData).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,7).flatMap(([d,es])=>es.map((e,i)=>`<div class="entry"><div><div class="ent-date">${fmtD(d)} &middot; ${e.time||""}</div><div class="ent-val">${e.sys}/${e.dia} <span style="font-size:.85rem;color:var(--txt2)">mmHg</span></div><div class="ent-sub">Pulse ${e.pulse||"--"} bpm &middot; ${e.arm||"Arm not noted"}</div>${e.meds?`<div class="ent-sub">Meds: ${e.meds}</div>`:""} ${e.notes?`<div class="ent-sub">${e.notes}</div>`:""}</div><button class="btn-del" onclick="delBP('${d}',${i})">&#10005;</button></div>`)).join("")||`<div class="empty"><div class="empty-icon">\u{1FA7A}</div><h3>No readings yet</h3><p>Log your first reading above.</p></div>`;
+  const calLeg=`<div class="leg"><div class="leg-dot" style="background:#4CAF50"></div>Optimal</div><div class="leg"><div class="leg-dot" style="background:#FFC107"></div>Elevated</div><div class="leg"><div class="leg-dot" style="background:#FF9800"></div>High</div><div class="leg"><div class="leg-dot" style="background:#F44336"></div>Very high</div>`;
+  const views=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem"><button class="th-btn${ST.bpView==="form"?" on":""}" onclick="ST.bpView='form';renderBPPage()">Log Reading</button><button class="th-btn${ST.bpView==="cal"?" on":""}" onclick="ST.bpView='cal';renderBPPage()">Calendar</button><button class="th-btn${ST.bpView==="chart"?" on":""}" onclick="ST.bpView='chart';renderBPPage()">Chart</button><button class="th-btn${ST.bpView==="log"?" on":""}" onclick="ST.bpView='log';renderBPPage()">History</button></div>`;
+  let main="";
+  if(ST.bpView==="form") main=`<div class="card"><div class="card-title">Log a reading</div><form id="bpf" onsubmit="event.preventDefault();submitBP()"><div class="row2"><div class="field"><label>Systolic (top number)</label><input type="number" name="sys" placeholder="e.g. 120"/></div><div class="field"><label>Diastolic (bottom number)</label><input type="number" name="dia" placeholder="e.g. 80"/></div></div><div class="row2"><div class="field"><label>Pulse (bpm)</label><input type="number" name="pulse" placeholder="e.g. 72"/></div><div class="field"><label>Arm used</label><select name="arm"><option value="">Select</option><option>Left arm</option><option>Right arm</option></select></div></div><div class="field"><label>Medication taken before this reading?</label><select name="meds"><option value="">Select</option><option>Yes &mdash; taken before reading</option><option>Yes &mdash; taken after reading</option><option>No medications</option></select></div><div class="field"><label>Notes</label><textarea name="notes" placeholder="Caffeine, exercise, stress before reading..."></textarea></div><button type="submit" class="btn btn-pri btn-full">Save Reading</button></form></div>${flagHtml}${refCard}<div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Sit quietly for 5 minutes before measuring. Record readings at a consistent time of day. Note whether taken before or after medication &mdash; this affects interpretation. This log can be shared with your GP or pharmacist.</div></div><div class="disclaimer"><p>This tracker does not diagnose or treat high blood pressure. Readings flagged as high are based on NICE NG136 thresholds and are for information only. Always consult your GP for medical assessment.</p></div>`;
+  else if(ST.bpView==="cal") main=renderCal(ST.bpMonth,d=>bpCalColor(ST.bpData[d]),calLeg,"bpDayClick")+`<div class="info-box"><p>Colours are based on average systolic readings per day. Tap any day to see your full readings.</p></div>`;
+  else if(ST.bpView==="chart") main=chartHtml+refCard;
+  else main=`<p class="sec-lbl">Reading History</p>${log}`;
+  document.getElementById("s-bp").innerHTML=`<div class="top"><h2>Blood Pressure Log</h2><div class="top-sub">Track readings &mdash; know your numbers</div></div>${views}${main}`;
+}
+
+// ═══════════════════════════════════════════
+//  DIARY PAGE
+// ═══════════════════════════════════════════
+function getWeekKey(){const d=new Date();const day=d.getDay()||7;const mon=new Date(d);mon.setDate(d.getDate()-day+1);return mon.toISOString().slice(0,10);}
+function getMonthKey(){return new Date().toISOString().slice(0,7);}
+function saveWeekly(){
+  const f=document.getElementById("wf");if(!f)return;
+  ST.weeklyData[getWeekKey()]={journal:f.journal.value,mood:ST._wMood,reflection:f.reflection.value,water:ST._wWater,meditation:ST._wMed,medMins:f.medmins?f.medmins.value:"",exercise:f.exercise.value,exDur:f.exdur?f.exdur.value:"",ts:Date.now()};
+  sv("weeklyData");alert("Weekly diary saved successfully.");renderDiaryPage();
+}
+function saveMonthly(){
+  const f=document.getElementById("mf");if(!f)return;
+  ST.monthlyData[getMonthKey()]={reflection:f.reflection.value,wentWell:f.wentWell.value,didntGoWell:f.didntGoWell.value,doDifferently:f.doDifferently.value,mood:ST._mMood,highlight:f.highlight.value,ts:Date.now()};
+  sv("monthlyData");alert("Monthly reflection saved successfully.");renderDiaryPage();
+}
+function renderDiaryPage(){
+  const wd=ST.weeklyData[getWeekKey()]||{};const md=ST.monthlyData[getMonthKey()]||{};
+  ST._wMood=wd.mood||0;ST._wWater=wd.water||0;ST._wMed=wd.meditation||false;ST._mMood=md.mood||0;
+  const wM=MOODS.map((e,i)=>`<button class="face-btn${ST._wMood===i+1?" on":""}" onclick="ST._wMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
+  const mM=MOODS.map((e,i)=>`<button class="face-btn${ST._mMood===i+1?" on":""}" onclick="ST._mMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
+  const wD=[1,2,3,4,5,6,7,8].map(i=>`<div class="w-drop${ST._wWater>=i?" on":""}" onclick="ST._wWater=${i};renderDiaryPage()">\u{1F4A7}</div>`).join("");
+  const medT=`<div class="tog-row"><button class="tog${ST._wMed?" on":""}" onclick="ST._wMed=true;renderDiaryPage()">Yes</button><button class="tog${!ST._wMed?" on":""}" onclick="ST._wMed=false;renderDiaryPage()">No</button></div>`;
+  const tabs=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem"><button class="th-btn${ST.diaryTab==="weekly"?" on":""}" onclick="ST.diaryTab='weekly';renderDiaryPage()">Weekly Journal</button><button class="th-btn${ST.diaryTab==="monthly"?" on":""}" onclick="ST.diaryTab='monthly';renderDiaryPage()">Monthly Reflection</button></div>`;
+  let main="";
+  if(ST.diaryTab==="weekly") main=`<div class="card"><div class="card-title">This Week&#8217;s Wellness Journal</div><form id="wf" onsubmit="event.preventDefault();saveWeekly()"><div class="field"><label>Journal &mdash; write freely about your week</label><textarea name="journal" style="min-height:130px" placeholder="How has this week been? What&#8217;s on your mind?">${wd.journal||""}</textarea></div><div class="field"><label>Overall mood this week</label><div class="mood-faces">${wM}</div></div><div class="field"><label>Weekly reflection &mdash; what stood out?</label><textarea name="reflection" placeholder="Patterns, wins, challenges noticed this week...">${wd.reflection||""}</textarea></div><div class="field"><label>Average glasses of water per day</label><div class="water-track">${wD}</div></div><div class="field"><label>Did you meditate or practise mindfulness this week?</label>${medT}</div>${ST._wMed?`<div class="field"><label>Total minutes of mindfulness</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`:`<input type="hidden" name="medmins"/>`}<div class="field"><label>Exercise and movement this week</label><textarea name="exercise" placeholder="Types of activity, frequency, how you felt..." style="min-height:80px">${wd.exercise||""}</textarea></div><div class="field"><label>Total active minutes this week</label><input type="number" name="exdur" placeholder="e.g. 120" value="${wd.exDur||""}"/></div><button type="submit" class="btn btn-pri btn-full">Save This Week</button></form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Tracking hydration, movement and mindfulness together can help reveal patterns in energy and mood. There is good evidence that even short daily mindfulness practice supports stress management and sleep quality.</div></div>`;
+  else main=`<div class="card"><div class="card-title">Monthly Reflection</div><form id="mf" onsubmit="event.preventDefault();saveMonthly()"><div class="field"><label>How do I feel about this month?</label><div class="mood-faces">${mM}</div></div><div class="field"><label>Monthly reflection &mdash; looking back</label><textarea name="reflection" style="min-height:120px" placeholder="What has this month been like for you overall?">${md.reflection||""}</textarea></div><div class="field"><label>What went well this month?</label><textarea name="wentWell" placeholder="Wins, achievements, moments you are proud of...">${md.wentWell||""}</textarea></div><div class="field"><label>What was difficult or didn&#8217;t go to plan?</label><textarea name="didntGoWell" placeholder="Challenges, setbacks, things that were hard...">${md.didntGoWell||""}</textarea></div><div class="field"><label>What would I do differently next month?</label><textarea name="doDifferently" placeholder="Changes to make, habits to build or let go of...">${md.doDifferently||""}</textarea></div><div class="field"><label>My highlight of this month</label><textarea name="highlight" placeholder="The one moment or thing I want to remember..." style="min-height:80px">${md.highlight||""}</textarea></div><button type="submit" class="btn btn-pri btn-full">Save Reflection</button></form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Monthly reflection builds self-awareness over time. Research in positive psychology shows that regularly noting what went well &mdash; alongside what to improve &mdash; supports both resilience and meaningful behaviour change.</div></div>`;
+  document.getElementById("s-diary").innerHTML=`<div class="top"><h2>Wellness Diary</h2><div class="top-sub">Journal &mdash; reflect &mdash; grow</div></div>${tabs}${main}`;
+}
+
+// ═══════════════════════════════════════════
+//  LEARN PAGE
+// ═══════════════════════════════════════════
+function renderLearnPage(){
+  document.getElementById("s-learn").innerHTML=`
+  <div class="top"><h2>Learn</h2><div class="top-sub">Pharmacist-written health information &middot; <a href="references.html" target="_blank" style="text-decoration:underline;color:inherit">see references</a></div></div>
+  <div class="pnote"><div class="pnote-lbl">About these articles</div><div class="pnote-txt">All articles are written by a GPhC-registered pharmacist with 12 years of clinical experience. They are based on current NHS, NICE and clinical guidance and are intended for general information only. They do not replace the advice of your GP or pharmacist.</div></div>
+  ${ARTS.map(a=>`<div class="art-card" onclick="openArticle('${a.id}')"><div class="art-thumb" style="background:${a.bg}">${a.icon}</div><div class="art-body"><div class="art-cat">${a.cat}</div><div class="art-title">${a.title}</div><div class="art-prev">${a.prev}</div></div></div>`).join("")}`;
+}
+
+function renderArticle(){
+  const a=ARTS.find(x=>x.id===ST.articleId);if(!a){go("learn");return;}
+  document.getElementById("s-article").innerHTML=`
+  <button class="btn-back" onclick="go('learn')">\u2190 Back to Learn</button>
+  <div style="padding:0 1rem"><div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem"><div style="width:54px;height:54px;background:${a.bg};border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0">${a.icon}</div><div><div class="cat-badge">${a.cat}</div><h2 style="font-size:1.4rem;margin-top:.2rem;color:var(--txt)">${a.title}</h2></div></div></div>
+  <div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">${a.pnote}</div></div>
+  <div class="art-full" style="padding:0 1rem 1rem">${a.secs.map(s=>`<h3>${s.h}</h3><p>${s.p}</p>`).join("")}</div>
+  <div class="card-sm"><div style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--acc2);margin-bottom:.25rem">Sources</div><div style="font-size:.74rem;color:var(--txt2);line-height:1.65">${a.refs}</div></div>
+  <div class="disclaimer" style="margin:.65rem 1rem"><p>${a.disclaimer}</p></div>
+  <div style="height:1rem"></div>`;
+}
+
+// ═══════════════════════════════════════════
+//  ABOUT THE PHARMACIST PAGE
+// ═══════════════════════════════════════════
+function renderAboutPage(){
+  document.getElementById("s-about").innerHTML=`
+  <div class="about-hero">
+    <div class="about-avatar">\u{1F469}\u200D\u2695\uFE0F</div>
+    <div class="about-name">The Wellness Script</div>
+    <div class="about-title">GPhC Registered Pharmacist &middot; 12 Years Clinical Experience</div>
+  </div>
+  <div class="why-card">
+    <h3>Why I built this app</h3>
+    <p>After 12 years working as a pharmacist, I kept seeing the same gap: people wanted to understand their health, not just be told what to take. Generic wellness apps look beautiful but lack clinical grounding. Doctors are stretched. Pharmacists are underused. I built The Wellness Script to bridge that gap &mdash; giving you the tools to track, understand and take ownership of your wellbeing, with a qualified pharmacist behind every word.</p>
+  </div>
+  <div class="cred-row">
+    <div class="cred-item"><div class="ci-icon">\u{1F4CB}</div><div><div class="ci-title">GPhC Registered Pharmacist</div><div class="ci-desc">Registered with the General Pharmaceutical Council &mdash; the UK regulatory body for pharmacists. All clinical content in this app meets professional standards.</div></div></div>
+    <div class="cred-item"><div class="ci-icon">\u{1F4C5}</div><div><div class="ci-title">12 Years Clinical Experience</div><div class="ci-desc">Over a decade of practice across NHS and private pharmacy, developing deep expertise in medicines, sleep health, women&rsquo;s health and patient education.</div></div></div>
+    <div class="cred-item"><div class="ci-icon">\u{1F4A4}</div><div><div class="ci-title">Specialist Interest: Sleep & Women&#8217;s Health</div><div class="ci-desc">Particular focus on how medications, hormones, postnatal changes and lifestyle factors interact with sleep quality &mdash; an area most wellness tools overlook entirely.</div></div></div>
+    <div class="cred-item"><div class="ci-icon">\u{1F4DA}</div><div><div class="ci-title">Evidence-Based Approach</div><div class="ci-desc">Every tracker, article and pharmacist note in this app is grounded in NHS guidance, NICE guidelines and peer-reviewed research &mdash; reviewed and updated regularly.</div></div></div>
+    <div class="cred-item"><div class="ci-icon">\u{1F4BB}</div><div><div class="ci-title">This App &mdash; What Makes It Different</div><div class="ci-desc">The Wellness Script is not just a tracker. It combines clinical-grade health monitoring with pharmacist-written health education, built specifically around the needs of women managing busy lives, new motherhood and hormonal changes.</div></div></div>
+  </div>
+  <div class="card-sm" style="margin:.65rem 1rem"><div style="font-size:.7rem;font-weight:500;color:var(--txt);margin-bottom:.4rem">Contact &amp; Consultations</div>
+    <div class="contact-item" style="padding:.75rem;margin-bottom:.5rem"><div style="font-size:1.1rem;margin-right:.5rem">\u2709\uFE0F</div><div><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--txt2)">Email</div><div style="font-size:.85rem;color:var(--pri);font-weight:500"><a href="mailto:thewellnessscriptedu@gmail.com" style="color:var(--pri)">thewellnessscriptedu@gmail.com</a></div></div></div>
+    <div class="contact-item" style="padding:.75rem;margin-bottom:.5rem"><div style="font-size:1.1rem;margin-right:.5rem">\u{1F30D}</div><div><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--txt2)">Website</div><div style="font-size:.85rem;color:var(--pri);font-weight:500">wellnessscript.org</div></div></div>
+    <div class="contact-item" style="padding:.75rem"><div style="font-size:1.1rem;margin-right:.5rem">\u{1F4AC}</div><div><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--txt2)">Education & Wellness Consultations</div><div style="font-size:.85rem;color:var(--txt2)">Launching soon &mdash; join the waitlist at wellnessscript.org</div></div></div>
+  </div>
+  <div class="disclaimer"><p>The Wellness Script app provides general wellness tracking tools and pharmacist-written health information for educational purposes. It does not constitute medical advice, diagnosis or treatment, and does not replace the advice of your GP, pharmacist or other healthcare professional. Always consult a qualified healthcare professional for personal medical concerns. In an emergency, call 999. Mental health crisis support: Samaritans 116 123.</p></div>
+  <div style="text-align:center;padding:1rem;font-size:.68rem;color:var(--txt3)">Version 1.0 &middot; &copy; 2026 The Wellness Script<br>
+  <button onclick="logout()" style="background:none;border:none;font-size:.68rem;color:var(--txt3);cursor:pointer;text-decoration:underline;margin-top:.3rem">Sign out of app</button></div>`;
+}
+
+// ═══════════════════════════════════════════
+//  HOME PAGE
+// ═══════════════════════════════════════════
+function renderHome(){
+  const sc=Object.keys(ST.sleepData).length,bc=Object.values(ST.bpData).reduce((a,e)=>a+e.length,0),dc=Object.keys(ST.weeklyData).length;
+  document.getElementById("s-home").innerHTML=`
+  <div class="home-hero">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="home-greet">${greet()}</div>
+        <div class="home-title">Your <em>Wellness Script</em></div>
+        <div class="home-usp">Clinical knowledge &mdash; in your hands.<br>Built by a pharmacist, designed for you.</div>
+      </div>
+      <button onclick="go('about')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.65);border-radius:20px;padding:.35rem .8rem;font-size:.66rem;letter-spacing:.06em;cursor:pointer;flex-shrink:0;margin-top:.25rem">About</button>
+    </div>
+  </div>
+  <div class="theme-bar">
+    <button class="th-btn${ST.theme==="cream"?" on":""}" data-t="cream" onclick="setTheme('cream')">Cream</button>
+    <button class="th-btn${ST.theme==="dark"?" on":""}" data-t="dark" onclick="setTheme('dark')">Dark</button>
+    <button class="th-btn${ST.theme==="sage"?" on":""}" data-t="sage" onclick="setTheme('sage')">Sage</button>
+    <button class="th-btn${ST.theme==="blush"?" on":""}" data-t="blush" onclick="setTheme('blush')">Blush</button>
+  </div>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-num">${sc}</div><div class="stat-lbl">Sleep entries</div></div>
+    <div class="stat-card"><div class="stat-num">${bc}</div><div class="stat-lbl">BP readings</div></div>
+    <div class="stat-card"><div class="stat-num">${dc}</div><div class="stat-lbl">Diary weeks</div></div>
+  </div>
+  <p class="sec-lbl">Your Tools</p>
+  <div class="shortcut-grid">
+    <div class="sc" onclick="go('sleep')"><div class="sc-icon">\u{1F4A4}</div><div class="sc-name">Sleep Tracker</div><div class="sc-sub">Log nightly &mdash; see patterns</div></div>
+    <div class="sc" onclick="go('bp')"><div class="sc-icon">\u{1FA7A}</div><div class="sc-name">Blood Pressure Log</div><div class="sc-sub">Track readings with NHS flags</div></div>
+    <div class="sc" onclick="go('diary')"><div class="sc-icon">\u{1F4D6}</div><div class="sc-name">Wellness Diary</div><div class="sc-sub">Weekly journal &amp; monthly review</div></div>
+    <div class="sc" onclick="go('learn')"><div class="sc-icon">\u{1F4DA}</div><div class="sc-name">Learn</div><div class="sc-sub">Pharmacist-written health articles</div></div>
+  </div>
+  <div class="pnote"><div class="pnote-lbl">\u{1F48A} Pharmacist&#8217;s Daily Tip</div><div class="pnote-txt">The most powerful wellness habit costs nothing: go to bed and wake up at the same time every day &mdash; even weekends. Consistent sleep timing is the foundation everything else builds on.</div></div>
+  <div class="disclaimer"><p>This app is for wellness tracking and health education only. It does not constitute medical advice. Your data is stored locally in your browser on this device. Always consult your GP or pharmacist for personal health concerns. In an emergency call 999.</p></div>`;
+}
+
+// ═══════════════════════════════════════════
+//  RENDER ROUTER
+// ═══════════════════════════════════════════
+function render(){
+  if(ST.page==="home")  renderHome();
+  if(ST.page==="sleep") renderSleepPage();
+  if(ST.page==="bp")    renderBPPage();
+  if(ST.page==="diary") renderDiaryPage();
+  if(ST.page==="learn") renderLearnPage();
+  if(ST.page==="about") renderAboutPage();
+}
+
+// ── INIT ──
+setTheme(ST.theme);
+if(checkAccess()) render();
+</script>
+</body>
+</html>
