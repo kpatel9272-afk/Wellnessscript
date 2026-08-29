@@ -301,6 +301,7 @@ const CODE_HASHES = new Set([
   "f6e053c7d17f5b251c9e2ee7860419f737ed6c35aebacb16b08aecf0331cfd10",
   "378566f405ce9a1d451df2c12ee7b7f64c39fbed97952b420700f0178d228ee6",
   "6a2ca0d93b1276f30960d872368a4aed5cd6f65fb766b279bd76a74c5f207f78",
+  "1de0bc6bcdb12e2eb82cba2ffbcb9efc85b00a4be356236140304ecca4113af1",
 ]);
 
 async function sha256(msg){
@@ -522,15 +523,28 @@ function renderCal(monthStr,colorFn,legendHtml,dayClick){
 // ═══════════════════════════════════════════
 function sleepSetQ(v){ST._sleepQ=v;document.querySelectorAll(".sq").forEach((b,i)=>b.classList.toggle("on",i<v));}
 function sleepSetW(v){ST._sleepW=v;document.querySelectorAll(".sw").forEach((b,i)=>b.classList.toggle("on",i===v-1));}
+function calcSleepHours(){
+  const f=document.getElementById("slf");if(!f)return;
+  const bt=f.bedtime.value,wk=f.wake.value;
+  if(!bt||!wk)return;
+  const [bh,bm]=bt.split(":").map(Number);
+  const [wh,wm]=wk.split(":").map(Number);
+  let mins=(wh*60+wm)-(bh*60+bm);
+  if(mins<=0)mins+=24*60; // wake time is next day
+  const hrs=Math.round((mins/60)*4)/4; // round to nearest 0.25h
+  document.getElementById("sleepHoursInput").value=hrs;
+}
 function submitSleep(){
   const f=document.getElementById("slf");
   ST.sleepData[today()]={date:today(),bedtime:f.bedtime.value||"--",wake:f.wake.value||"--",hours:parseFloat(f.hours.value)||0,quality:ST._sleepQ,waking:ST._sleepW,meds:f.meds.value,other:f.other.value,diary:f.diary.value,ts:Date.now()};
-  sv("sleepData");ST._sleepQ=0;ST._sleepW=0;renderSleepPage();
+  sv("sleepData");ST._sleepQ=0;ST._sleepW=0;
+  alert("Sleep entry saved successfully.");
+  ST.sleepView="log";renderSleepPage();
 }
 function delSleep(d){delete ST.sleepData[d];sv("sleepData");renderSleepPage();}
 function renderSleepPage(){
-  const qS=[1,2,3,4,5].map(i=>`<button class="star sq${ST._sleepQ>=i?" on":""}" onclick="sleepSetQ(${i})">${i}</button>`).join("");
-  const wE=WAKING.map((e,i)=>`<button class="emj sw${ST._sleepW===i+1?" on":""}" onclick="sleepSetW(${i+1})">${e}</button>`).join("");
+  const qS=[1,2,3,4,5].map(i=>`<button type="button" class="star sq${ST._sleepQ>=i?" on":""}" onclick="sleepSetQ(${i})">${i}</button>`).join("");
+  const wE=WAKING.map((e,i)=>`<button type="button" class="emj sw${ST._sleepW===i+1?" on":""}" onclick="sleepSetW(${i+1})">${e}</button>`).join("");
   const entries=Object.entries(ST.sleepData).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10)
     .map(([d,e])=>`<div class="entry"><div><div class="ent-date">${fmtD(d)}</div><div class="ent-val">${e.hours}h &nbsp;${"\u2605".repeat(e.quality||0)}</div><div class="ent-sub">${e.bedtime} \u2192 ${e.wake}&nbsp;&nbsp;Waking: ${WAKING[e.waking-1]||"--"}</div>${e.meds?`<div class="ent-sub">Meds: ${e.meds}</div>`:""} ${e.other?`<div class="ent-sub">${e.other}</div>`:""} ${e.diary?`<div class="ent-diary">"${e.diary}"</div>`:""}</div><button class="btn-del" onclick="delSleep('${d}')">&#10005;</button></div>`).join("")||`<div class="empty"><div class="empty-icon">\u{1F4A4}</div><h3>No entries yet</h3><p>Log your first night above to begin tracking.</p></div>`;
   const calLeg=`<div class="leg"><div class="leg-dot" style="background:#4CAF50"></div>Good (4\u20135)</div><div class="leg"><div class="leg-dot" style="background:#FFC107"></div>Average (3)</div><div class="leg"><div class="leg-dot" style="background:#F44336"></div>Poor (1\u20132)</div>`;
@@ -543,8 +557,8 @@ function renderSleepPage(){
   if(ST.sleepView==="form") main=`
   <div class="card"><div class="card-title">Log last night&#8217;s sleep</div>
   <form id="slf" onsubmit="event.preventDefault();submitSleep()">
-    <div class="row2"><div class="field"><label>Bedtime</label><input type="time" name="bedtime"/></div><div class="field"><label>Wake time</label><input type="time" name="wake"/></div></div>
-    <div class="field"><label>Hours slept</label><input type="number" name="hours" min="0" max="24" step="0.5" placeholder="e.g. 7.5"/></div>
+    <div class="row2"><div class="field"><label>Bedtime</label><input type="time" name="bedtime" oninput="calcSleepHours()"/></div><div class="field"><label>Wake time</label><input type="time" name="wake" oninput="calcSleepHours()"/></div></div>
+    <div class="field"><label>Hours slept</label><input type="number" name="hours" id="sleepHoursInput" min="0" max="24" step="0.5" placeholder="Auto-calculated, or enter manually"/></div>
     <div class="field"><label>Sleep quality &mdash; 1 poor, 5 excellent</label><div class="stars">${qS}</div></div>
     <div class="field"><label>How do you feel on waking?</label><div class="emoji-row">${wE}</div></div>
     <div class="field"><label>Medications taken last night?</label><select name="meds"><option value="">Select</option><option>Yes &mdash; all taken</option><option>Yes &mdash; some missed</option><option>No medications</option><option>New medication started</option></select></div>
@@ -567,7 +581,9 @@ function submitBP(){
   const sys=parseInt(f.sys.value),dia=parseInt(f.dia.value);
   const entry={sys,dia,pulse:parseInt(f.pulse.value)||0,arm:f.arm.value,meds:f.meds.value,notes:f.notes.value,time:nowT(),ts:Date.now()};
   if(!ST.bpData[today()])ST.bpData[today()]=[];
-  ST.bpData[today()].unshift(entry);sv("bpData");ST._bpFlag=bpFlag(sys,dia);renderBPPage();
+  ST.bpData[today()].unshift(entry);sv("bpData");ST._bpFlag=bpFlag(sys,dia);
+  alert("Blood pressure reading saved successfully.");
+  ST.bpView="log";renderBPPage();
 }
 function delBP(d,i){ST.bpData[d].splice(i,1);if(!ST.bpData[d].length)delete ST.bpData[d];sv("bpData");renderBPPage();}
 function renderBPPage(){
@@ -617,10 +633,10 @@ function saveMonthly(){
 function renderDiaryPage(){
   const wd=ST.weeklyData[getWeekKey()]||{};const md=ST.monthlyData[getMonthKey()]||{};
   ST._wMood=wd.mood||0;ST._wWater=wd.water||0;ST._wMed=wd.meditation||false;ST._mMood=md.mood||0;
-  const wM=MOODS.map((e,i)=>`<button class="face-btn${ST._wMood===i+1?" on":""}" onclick="ST._wMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
-  const mM=MOODS.map((e,i)=>`<button class="face-btn${ST._mMood===i+1?" on":""}" onclick="ST._mMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
+  const wM=MOODS.map((e,i)=>`<button type="button" class="face-btn${ST._wMood===i+1?" on":""}" onclick="ST._wMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
+  const mM=MOODS.map((e,i)=>`<button type="button" class="face-btn${ST._mMood===i+1?" on":""}" onclick="ST._mMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
   const wD=[1,2,3,4,5,6,7,8].map(i=>`<div class="w-drop${ST._wWater>=i?" on":""}" onclick="ST._wWater=${i};renderDiaryPage()">\u{1F4A7}</div>`).join("");
-  const medT=`<div class="tog-row"><button class="tog${ST._wMed?" on":""}" onclick="ST._wMed=true;renderDiaryPage()">Yes</button><button class="tog${!ST._wMed?" on":""}" onclick="ST._wMed=false;renderDiaryPage()">No</button></div>`;
+  const medT=`<div class="tog-row"><button type="button" class="tog${ST._wMed?" on":""}" onclick="ST._wMed=true;renderDiaryPage()">Yes</button><button type="button" class="tog${!ST._wMed?" on":""}" onclick="ST._wMed=false;renderDiaryPage()">No</button></div>`;
   const tabs=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem"><button class="th-btn${ST.diaryTab==="weekly"?" on":""}" onclick="ST.diaryTab='weekly';renderDiaryPage()">Weekly Journal</button><button class="th-btn${ST.diaryTab==="monthly"?" on":""}" onclick="ST.diaryTab='monthly';renderDiaryPage()">Monthly Reflection</button></div>`;
   let main="";
   if(ST.diaryTab==="weekly") main=`<div class="card"><div class="card-title">This Week&#8217;s Wellness Journal</div><form id="wf" onsubmit="event.preventDefault();saveWeekly()"><div class="field"><label>Journal &mdash; write freely about your week</label><textarea name="journal" style="min-height:130px" placeholder="How has this week been? What&#8217;s on your mind?">${wd.journal||""}</textarea></div><div class="field"><label>Overall mood this week</label><div class="mood-faces">${wM}</div></div><div class="field"><label>Weekly reflection &mdash; what stood out?</label><textarea name="reflection" placeholder="Patterns, wins, challenges noticed this week...">${wd.reflection||""}</textarea></div><div class="field"><label>Average glasses of water per day</label><div class="water-track">${wD}</div></div><div class="field"><label>Did you meditate or practise mindfulness this week?</label>${medT}</div>${ST._wMed?`<div class="field"><label>Total minutes of mindfulness</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`:`<input type="hidden" name="medmins"/>`}<div class="field"><label>Exercise and movement this week</label><textarea name="exercise" placeholder="Types of activity, frequency, how you felt..." style="min-height:80px">${wd.exercise||""}</textarea></div><div class="field"><label>Total active minutes this week</label><input type="number" name="exdur" placeholder="e.g. 120" value="${wd.exDur||""}"/></div><button type="submit" class="btn btn-pri btn-full">Save This Week</button></form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Tracking hydration, movement and mindfulness together can help reveal patterns in energy and mood. There is good evidence that even short daily mindfulness practice supports stress management and sleep quality.</div></div>`;
