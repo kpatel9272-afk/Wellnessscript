@@ -488,6 +488,7 @@ function sleepCalColor(e){if(!e||!e.quality)return null;return e.quality>=4?"gre
 // ═══════════════════════════════════════════
 function go(page){
   ST.page=page;ST.articleId=null;
+  if(page!=="diary")ST._diaryInit=false;
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("on"));
   document.getElementById("s-"+page).classList.add("active");
@@ -620,6 +621,15 @@ function renderBPPage(){
 // ═══════════════════════════════════════════
 function getWeekKey(){const d=new Date();const day=d.getDay()||7;const mon=new Date(d);mon.setDate(d.getDate()-day+1);return mon.toISOString().slice(0,10);}
 function getMonthKey(){return new Date().toISOString().slice(0,7);}
+function setWMood(v){ST._wMood=v;document.querySelectorAll(".wmood-btn").forEach((b,i)=>b.classList.toggle("on",i===v-1));}
+function setMMood(v){ST._mMood=v;document.querySelectorAll(".mmood-btn").forEach((b,i)=>b.classList.toggle("on",i===v-1));}
+function setWater(v){ST._wWater=v;document.querySelectorAll(".w-drop").forEach((b,i)=>b.classList.toggle("on",i<v));}
+function setWMed(v){
+  ST._wMed=v;
+  document.querySelectorAll(".wmed-yes").forEach(b=>b.classList.toggle("on",v===true));
+  document.querySelectorAll(".wmed-no").forEach(b=>b.classList.toggle("on",v===false));
+  const mf=document.getElementById("medMinsField");if(mf)mf.style.display=v?"block":"none";
+}
 function saveWeekly(){
   const f=document.getElementById("wf");if(!f)return;
   ST.weeklyData[getWeekKey()]={journal:f.journal.value,mood:ST._wMood,reflection:f.reflection.value,water:ST._wWater,meditation:ST._wMed,medMins:f.medmins?f.medmins.value:"",exercise:f.exercise.value,exDur:f.exdur?f.exdur.value:"",ts:Date.now()};
@@ -632,14 +642,14 @@ function saveMonthly(){
 }
 function renderDiaryPage(){
   const wd=ST.weeklyData[getWeekKey()]||{};const md=ST.monthlyData[getMonthKey()]||{};
-  ST._wMood=wd.mood||0;ST._wWater=wd.water||0;ST._wMed=wd.meditation||false;ST._mMood=md.mood||0;
-  const wM=MOODS.map((e,i)=>`<button type="button" class="face-btn${ST._wMood===i+1?" on":""}" onclick="ST._wMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
-  const mM=MOODS.map((e,i)=>`<button type="button" class="face-btn${ST._mMood===i+1?" on":""}" onclick="ST._mMood=${i+1};renderDiaryPage()">${e}</button>`).join("");
-  const wD=[1,2,3,4,5,6,7,8].map(i=>`<div class="w-drop${ST._wWater>=i?" on":""}" onclick="ST._wWater=${i};renderDiaryPage()">\u{1F4A7}</div>`).join("");
-  const medT=`<div class="tog-row"><button type="button" class="tog${ST._wMed?" on":""}" onclick="ST._wMed=true;renderDiaryPage()">Yes</button><button type="button" class="tog${!ST._wMed?" on":""}" onclick="ST._wMed=false;renderDiaryPage()">No</button></div>`;
+  if(!ST._diaryInit){ST._wMood=wd.mood||0;ST._wWater=wd.water||0;ST._wMed=wd.meditation||false;ST._mMood=md.mood||0;ST._diaryInit=true;}
+  const wM=MOODS.map((e,i)=>`<button type="button" class="face-btn wmood-btn${ST._wMood===i+1?" on":""}" onclick="setWMood(${i+1})">${e}</button>`).join("");
+  const mM=MOODS.map((e,i)=>`<button type="button" class="face-btn mmood-btn${ST._mMood===i+1?" on":""}" onclick="setMMood(${i+1})">${e}</button>`).join("");
+  const wD=[1,2,3,4,5,6,7,8].map(i=>`<div class="w-drop${ST._wWater>=i?" on":""}" onclick="setWater(${i})">\u{1F4A7}</div>`).join("");
+  const medT=`<div class="tog-row"><button type="button" class="tog wmed-yes${ST._wMed?" on":""}" onclick="setWMed(true)">Yes</button><button type="button" class="tog wmed-no${!ST._wMed?" on":""}" onclick="setWMed(false)">No</button></div>`;
   const tabs=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem"><button class="th-btn${ST.diaryTab==="weekly"?" on":""}" onclick="ST.diaryTab='weekly';renderDiaryPage()">Weekly Journal</button><button class="th-btn${ST.diaryTab==="monthly"?" on":""}" onclick="ST.diaryTab='monthly';renderDiaryPage()">Monthly Reflection</button></div>`;
   let main="";
-  if(ST.diaryTab==="weekly") main=`<div class="card"><div class="card-title">This Week&#8217;s Wellness Journal</div><form id="wf" onsubmit="event.preventDefault();saveWeekly()"><div class="field"><label>Journal &mdash; write freely about your week</label><textarea name="journal" style="min-height:130px" placeholder="How has this week been? What&#8217;s on your mind?">${wd.journal||""}</textarea></div><div class="field"><label>Overall mood this week</label><div class="mood-faces">${wM}</div></div><div class="field"><label>Weekly reflection &mdash; what stood out?</label><textarea name="reflection" placeholder="Patterns, wins, challenges noticed this week...">${wd.reflection||""}</textarea></div><div class="field"><label>Average glasses of water per day</label><div class="water-track">${wD}</div></div><div class="field"><label>Did you meditate or practise mindfulness this week?</label>${medT}</div>${ST._wMed?`<div class="field"><label>Total minutes of mindfulness</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`:`<input type="hidden" name="medmins"/>`}<div class="field"><label>Exercise and movement this week</label><textarea name="exercise" placeholder="Types of activity, frequency, how you felt..." style="min-height:80px">${wd.exercise||""}</textarea></div><div class="field"><label>Total active minutes this week</label><input type="number" name="exdur" placeholder="e.g. 120" value="${wd.exDur||""}"/></div><button type="submit" class="btn btn-pri btn-full">Save This Week</button></form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Tracking hydration, movement and mindfulness together can help reveal patterns in energy and mood. There is good evidence that even short daily mindfulness practice supports stress management and sleep quality.</div></div>`;
+  if(ST.diaryTab==="weekly") main=`<div class="card"><div class="card-title">This Week&#8217;s Wellness Journal</div><form id="wf" onsubmit="event.preventDefault();saveWeekly()"><div class="field"><label>Journal &mdash; write freely about your week</label><textarea name="journal" style="min-height:130px" placeholder="How has this week been? What&#8217;s on your mind?">${wd.journal||""}</textarea></div><div class="field"><label>Overall mood this week</label><div class="mood-faces">${wM}</div></div><div class="field"><label>Weekly reflection &mdash; what stood out?</label><textarea name="reflection" placeholder="Patterns, wins, challenges noticed this week...">${wd.reflection||""}</textarea></div><div class="field"><label>Average glasses of water per day</label><div class="water-track">${wD}</div></div><div class="field"><label>Did you meditate or practise mindfulness this week?</label>${medT}</div>${ST._wMed?`<div class="field" id="medMinsField"><label>Total minutes of mindfulness</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`:`<div class="field" id="medMinsField" style="display:none"><label>Total minutes of mindfulness</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`}<div class="field"><label>Exercise and movement this week</label><textarea name="exercise" placeholder="Types of activity, frequency, how you felt..." style="min-height:80px">${wd.exercise||""}</textarea></div><div class="field"><label>Total active minutes this week</label><input type="number" name="exdur" placeholder="e.g. 120" value="${wd.exDur||""}"/></div><button type="submit" class="btn btn-pri btn-full">Save This Week</button></form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Tracking hydration, movement and mindfulness together can help reveal patterns in energy and mood. There is good evidence that even short daily mindfulness practice supports stress management and sleep quality.</div></div>`;
   else main=`<div class="card"><div class="card-title">Monthly Reflection</div><form id="mf" onsubmit="event.preventDefault();saveMonthly()"><div class="field"><label>How do I feel about this month?</label><div class="mood-faces">${mM}</div></div><div class="field"><label>Monthly reflection &mdash; looking back</label><textarea name="reflection" style="min-height:120px" placeholder="What has this month been like for you overall?">${md.reflection||""}</textarea></div><div class="field"><label>What went well this month?</label><textarea name="wentWell" placeholder="Wins, achievements, moments you are proud of...">${md.wentWell||""}</textarea></div><div class="field"><label>What was difficult or didn&#8217;t go to plan?</label><textarea name="didntGoWell" placeholder="Challenges, setbacks, things that were hard...">${md.didntGoWell||""}</textarea></div><div class="field"><label>What would I do differently next month?</label><textarea name="doDifferently" placeholder="Changes to make, habits to build or let go of...">${md.doDifferently||""}</textarea></div><div class="field"><label>My highlight of this month</label><textarea name="highlight" placeholder="The one moment or thing I want to remember..." style="min-height:80px">${md.highlight||""}</textarea></div><button type="submit" class="btn btn-pri btn-full">Save Reflection</button></form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Monthly reflection builds self-awareness over time. Research in positive psychology shows that regularly noting what went well &mdash; alongside what to improve &mdash; supports both resilience and meaningful behaviour change.</div></div>`;
   document.getElementById("s-diary").innerHTML=`<div class="top"><h2>Wellness Diary</h2><div class="top-sub">Journal &mdash; reflect &mdash; grow</div></div>${tabs}${main}`;
 }
@@ -752,4 +762,4 @@ setTheme(ST.theme);
 if(checkAccess()) render();
 </script>
 </body>
-</html>
+  </html>
