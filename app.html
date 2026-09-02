@@ -104,6 +104,8 @@ nav{height:68px;background:var(--nav);border-top:1px solid rgba(255,255,255,.08)
 .btn-pri:hover{opacity:.88}
 .btn-ghost{background:var(--acc3);color:var(--pri);border:1px solid var(--border)}
 .btn-del{background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;font-size:.72rem;padding:.35rem .7rem;border-radius:8px}
+.btn-edit{background:var(--card);color:var(--pri2);border:1px solid var(--bg3);font-size:.72rem;padding:.35rem .7rem;border-radius:8px;margin-right:.4rem}
+.ent-actions{display:flex;align-items:flex-start}
 .btn-back{display:flex;align-items:center;gap:.4rem;font-size:.82rem;padding:1rem;background:none;border:none;cursor:pointer;color:var(--txt2)}
 
 /* ── CALENDAR ── */
@@ -506,7 +508,7 @@ const ST={
   bpMonth:new Date().toISOString().slice(0,7),
   sleepData:ld("sleep")||{},bpData:ld("bp")||{},
   weeklyData:ld("weekly")||{},monthlyData:ld("monthly")||{},
-  _sleepQ:0,_sleepW:0,_wMood:0,_wWater:0,_wMed:false,_mMood:0,
+  _sleepQ:0,_sleepW:0,_wMood:0,_wWater:0,_wMed:false,_mMood:0,_editSleepDate:null,_editBP:null,_editWeekKey:null,_editMonthKey:null,_diaryMode:"form",
 };
 
 // ═══════════════════════════════════════════
@@ -544,7 +546,7 @@ function sleepCalColor(e){if(!e||!e.quality)return null;return e.quality>=4?"gre
 // ═══════════════════════════════════════════
 function go(page){
   ST.page=page;ST.articleId=null;
-  if(page!=="diary")ST._diaryInit=false;
+  if(page!=="diary"){ST._diaryInit=false;ST._diaryMode="form";ST._editWeekKey=null;ST._editMonthKey=null;}
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("on"));
   document.getElementById("s-"+page).classList.add("active");
@@ -588,14 +590,15 @@ function calcSleepHours(){
   const [wh,wm]=wk.split(":").map(Number);
   let mins=(wh*60+wm)-(bh*60+bm);
   if(mins<=0)mins+=24*60; // wake time is next day
-  const hrs=Math.round((mins/60)*4)/4; // round to nearest 0.25h
+  const hrs=Math.round((mins/60)*10)/10; // round to nearest 0.1h
   document.getElementById("sleepHoursInput").value=hrs;
 }
 function submitSleep(){
   const f=document.getElementById("slf");
-  ST.sleepData[today()]={date:today(),bedtime:f.bedtime.value||"--",wake:f.wake.value||"--",hours:parseFloat(f.hours.value)||0,quality:ST._sleepQ,waking:ST._sleepW,meds:f.meds.value,other:f.other.value,diary:f.diary.value,ts:Date.now()};
-  sv("sleepData");ST._sleepQ=0;ST._sleepW=0;
-  alert("Sleep entry saved successfully.");
+  const key=ST._editSleepDate||today();
+  ST.sleepData[key]={date:key,bedtime:f.bedtime.value||"--",wake:f.wake.value||"--",hours:parseFloat(f.hours.value)||0,quality:ST._sleepQ,waking:ST._sleepW,meds:f.meds.value,other:f.other.value,diary:f.diary.value,ts:Date.now()};
+  sv("sleepData");const wasEdit=!!ST._editSleepDate;ST._editSleepDate=null;ST._sleepQ=0;ST._sleepW=0;
+  alert(wasEdit?"Sleep entry updated successfully.":"Sleep entry saved successfully.");
   ST.sleepView="log";renderSleepPage();
 }
 function delSleep(d){delete ST.sleepData[d];sv("sleepData");renderSleepPage();}
@@ -603,32 +606,38 @@ function renderSleepPage(){
   const qS=[1,2,3,4,5].map(i=>`<button type="button" class="star sq${ST._sleepQ>=i?" on":""}" onclick="sleepSetQ(${i})">${i}</button>`).join("");
   const wE=WAKING.map((e,i)=>`<button type="button" class="emj sw${ST._sleepW===i+1?" on":""}" onclick="sleepSetW(${i+1})">${e}</button>`).join("");
   const entries=Object.entries(ST.sleepData).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10)
-    .map(([d,e])=>`<div class="entry"><div><div class="ent-date">${fmtD(d)}</div><div class="ent-val">${e.hours}h &nbsp;${"\u2605".repeat(e.quality||0)}</div><div class="ent-sub">${e.bedtime} \u2192 ${e.wake}&nbsp;&nbsp;Waking: ${WAKING[e.waking-1]||"--"}</div>${e.meds?`<div class="ent-sub">Meds: ${e.meds}</div>`:""} ${e.other?`<div class="ent-sub">${e.other}</div>`:""} ${e.diary?`<div class="ent-diary">"${e.diary}"</div>`:""}</div><button class="btn-del" onclick="delSleep('${d}')">&#10005;</button></div>`).join("")||`<div class="empty"><div class="empty-icon">\u{1F4A4}</div><h3>No entries yet</h3><p>Log your first night above to begin tracking.</p></div>`;
+    .map(([d,e])=>`<div class="entry"><div><div class="ent-date">${fmtD(d)}</div><div class="ent-val">${e.hours}h &nbsp;${"\u2605".repeat(e.quality||0)}</div><div class="ent-sub">${e.bedtime} \u2192 ${e.wake}&nbsp;&nbsp;Waking: ${WAKING[e.waking-1]||"--"}</div>${e.meds?`<div class="ent-sub">Meds: ${e.meds}</div>`:""} ${e.other?`<div class="ent-sub">${e.other}</div>`:""} ${e.diary?`<div class="ent-diary">"${e.diary}"</div>`:""}</div><div class="ent-actions"><button class="btn-edit" onclick="editSleep('${d}')">&#9998;</button><button class="btn-del" onclick="delSleep('${d}')">&#10005;</button></div></div>`).join("")||`<div class="empty"><div class="empty-icon">\u{1F4A4}</div><h3>No entries yet</h3><p>Log your first night above to begin tracking.</p></div>`;
   const calLeg=`<div class="leg"><div class="leg-dot" style="background:#4CAF50"></div>Good (4\u20135)</div><div class="leg"><div class="leg-dot" style="background:#FFC107"></div>Average (3)</div><div class="leg"><div class="leg-dot" style="background:#F44336"></div>Poor (1\u20132)</div>`;
   const views=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem">
-    <button class="th-btn${ST.sleepView==="form"?" on":""}" onclick="ST.sleepView='form';renderSleepPage()">Log Sleep</button>
+    <button class="th-btn${ST.sleepView==="form"?" on":""}" onclick="ST._editSleepDate=null;ST.sleepView='form';renderSleepPage()">Log Sleep</button>
     <button class="th-btn${ST.sleepView==="cal"?" on":""}" onclick="ST.sleepView='cal';renderSleepPage()">Calendar</button>
     <button class="th-btn${ST.sleepView==="log"?" on":""}" onclick="ST.sleepView='log';renderSleepPage()">History</button>
   </div>`;
   let main="";
-  if(ST.sleepView==="form") main=`
-  <div class="card"><div class="card-title">Log last night&#8217;s sleep</div>
+  if(ST.sleepView==="form"){
+    const ed=ST._editSleepDate?ST.sleepData[ST._editSleepDate]:null;
+    if(ed&&ST._sleepQ===0&&ST._sleepW===0){ST._sleepQ=ed.quality||0;ST._sleepW=ed.waking||0;}
+    main=`
+  <div class="card"><div class="card-title">${ed?`Edit entry \u2014 ${fmtD(ST._editSleepDate)}`:"Log last night\u2019s sleep"}</div>
   <form id="slf" onsubmit="event.preventDefault();submitSleep()">
-    <div class="row2"><div class="field"><label>Bedtime</label><input type="time" name="bedtime" oninput="calcSleepHours()"/></div><div class="field"><label>Wake time</label><input type="time" name="wake" oninput="calcSleepHours()"/></div></div>
-    <div class="field"><label>Hours slept</label><input type="number" name="hours" id="sleepHoursInput" min="0" max="24" step="0.5" placeholder="Auto-calculated, or enter manually"/></div>
+    <div class="row2"><div class="field"><label>Bedtime</label><input type="time" name="bedtime" value="${ed&&ed.bedtime!=="--"?ed.bedtime:""}" oninput="calcSleepHours()"/></div><div class="field"><label>Wake time</label><input type="time" name="wake" value="${ed&&ed.wake!=="--"?ed.wake:""}" oninput="calcSleepHours()"/></div></div>
+    <div class="field"><label>Hours slept</label><input type="number" name="hours" id="sleepHoursInput" min="0" max="24" step="any" value="${ed?ed.hours:""}" placeholder="Auto-calculated, or enter manually"/></div>
     <div class="field"><label>Sleep quality &mdash; 1 poor, 5 excellent</label><div class="stars">${qS}</div></div>
     <div class="field"><label>How do you feel on waking?</label><div class="emoji-row">${wE}</div></div>
-    <div class="field"><label>Medications taken last night?</label><select name="meds"><option value="">Select</option><option>Yes &mdash; all taken</option><option>Yes &mdash; some missed</option><option>No medications</option><option>New medication started</option></select></div>
-    <div class="field"><label>Other notes &mdash; anything affecting your sleep</label><textarea name="other" placeholder="Stress, caffeine, room temperature, noise..."></textarea></div>
-    <div class="field"><label>Sleep diary &mdash; journal your thoughts freely</label><textarea name="diary" style="min-height:120px" placeholder="How are you feeling? Worries, dreams, anything on your mind..."></textarea></div>
-    <button type="submit" class="btn btn-pri btn-full">Save Sleep Entry</button>
+    <div class="field"><label>Medications taken last night?</label><select name="meds"><option value="">Select</option><option${ed&&ed.meds==="Yes — all taken"?" selected":""}>Yes &mdash; all taken</option><option${ed&&ed.meds==="Yes — some missed"?" selected":""}>Yes &mdash; some missed</option><option${ed&&ed.meds==="No medications"?" selected":""}>No medications</option><option${ed&&ed.meds==="New medication started"?" selected":""}>New medication started</option></select></div>
+    <div class="field"><label>Other notes &mdash; anything affecting your sleep</label><textarea name="other" placeholder="Stress, caffeine, room temperature, noise...">${ed?ed.other||"":""}</textarea></div>
+    <div class="field"><label>Sleep diary &mdash; journal your thoughts freely</label><textarea name="diary" style="min-height:120px" placeholder="How are you feeling? Worries, dreams, anything on your mind...">${ed?ed.diary||"":""}</textarea></div>
+    <button type="submit" class="btn btn-pri btn-full">${ed?"Update Entry":"Save Sleep Entry"}</button>
+    ${ed?`<button type="button" class="btn btn-full" style="background:none;color:var(--txt2);margin-top:.5rem" onclick="ST._editSleepDate=null;ST._sleepQ=0;ST._sleepW=0;renderSleepPage()">Cancel edit</button>`:""}
   </form></div>
   <div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Tracking your sleep over time helps identify patterns that a single night cannot reveal. If you notice consistent poor sleep that is affecting your daily life, speak to your GP &mdash; there may be an underlying cause worth investigating. Note: some common medications can affect sleep. Your pharmacist can advise.</div></div>
   <div class="disclaimer"><p>This tracker is for personal wellness monitoring only. It does not constitute medical advice. If you have significant concerns about your sleep, please speak to your GP.</p></div>`;
+  }
   else if(ST.sleepView==="cal") main=renderCal(ST.sleepMonth,d=>sleepCalColor(ST.sleepData[d]),calLeg,"sleepDayClick")+`<div class="info-box"><p>Tap any coloured day to see that night&#8217;s entry. Green = good sleep (4\u20135). Yellow = average (3). Red = poor (1\u20132).</p></div>`;
   else main=`<p class="sec-lbl">Your Sleep History</p>${entries}`;
   document.getElementById("s-sleep").innerHTML=`<div class="top"><h2>Sleep Tracker</h2><div class="top-sub">Log nightly &mdash; see your patterns</div></div>${views}${main}`;
 }
+function editSleep(d){ST._editSleepDate=d;ST._sleepQ=0;ST._sleepW=0;ST.sleepView="form";renderSleepPage();}
 
 // ═══════════════════════════════════════════
 //  BP PAGE
@@ -636,12 +645,21 @@ function renderSleepPage(){
 function submitBP(){
   const f=document.getElementById("bpf");
   const sys=parseInt(f.sys.value),dia=parseInt(f.dia.value);
-  const entry={sys,dia,pulse:parseInt(f.pulse.value)||0,arm:f.arm.value,meds:f.meds.value,notes:f.notes.value,time:nowT(),ts:Date.now()};
-  if(!ST.bpData[today()])ST.bpData[today()]=[];
-  ST.bpData[today()].unshift(entry);sv("bpData");ST._bpFlag=bpFlag(sys,dia);
-  alert("Blood pressure reading saved successfully.");
+  if(ST._editBP){
+    const {date,index}=ST._editBP;
+    const old=ST.bpData[date][index];
+    ST.bpData[date][index]={...old,sys,dia,pulse:parseInt(f.pulse.value)||0,arm:f.arm.value,meds:f.meds.value,notes:f.notes.value};
+    sv("bpData");ST._bpFlag=bpFlag(sys,dia);ST._editBP=null;
+    alert("Blood pressure reading updated successfully.");
+  } else {
+    const entry={sys,dia,pulse:parseInt(f.pulse.value)||0,arm:f.arm.value,meds:f.meds.value,notes:f.notes.value,time:nowT(),ts:Date.now()};
+    if(!ST.bpData[today()])ST.bpData[today()]=[];
+    ST.bpData[today()].unshift(entry);sv("bpData");ST._bpFlag=bpFlag(sys,dia);
+    alert("Blood pressure reading saved successfully.");
+  }
   ST.bpView="log";renderBPPage();
 }
+function editBP(d,i){ST._editBP={date:d,index:i};ST.bpView="form";renderBPPage();}
 function delBP(d,i){ST.bpData[d].splice(i,1);if(!ST.bpData[d].length)delete ST.bpData[d];sv("bpData");renderBPPage();}
 function renderBPPage(){
   const flag=ST._bpFlag;
@@ -661,11 +679,14 @@ function renderBPPage(){
     chartHtml=`<div class="card"><div class="card-title">Blood Pressure Trend</div><svg viewBox="0 0 320 110" style="width:100%;height:120px" preserveAspectRatio="none"><line x1="${pad}" y1="${target140y}" x2="${pw}" y2="${target140y}" stroke="#FFCC80" stroke-width="1" stroke-dasharray="4,3"/>${mkP(sv2,"#C49A7E")}${mkP(dv,"#F2C4A0")}</svg><div style="display:flex;gap:1rem;margin-top:.4rem;font-size:.68rem;color:var(--txt2)"><span style="display:flex;align-items:center;gap:.3rem"><span style="width:14px;height:3px;background:#C49A7E;display:inline-block;border-radius:2px"></span>Systolic</span><span style="display:flex;align-items:center;gap:.3rem"><span style="width:14px;height:3px;background:#F2C4A0;display:inline-block;border-radius:2px"></span>Diastolic</span><span style="display:flex;align-items:center;gap:.3rem"><span style="width:14px;height:3px;background:#FFCC80;display:inline-block;border-radius:2px;border:1px dashed #FFCC80"></span>140 mmHg</span></div></div>`;
   }
   const refCard=`<div class="card-sm"><div style="font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:.5rem">NICE NG136 Reference Ranges</div>${[["Optimal","< 120/80","#4CAF50"],["Normal","120\u2013129/80\u201384","#8BC34A"],["High-Normal","130\u2013139/85\u201389","#FFC107"],["High (Stage 1)","140\u2013159/90\u201399","#FF9800"],["High (Stage 2)","160\u2013179/100\u2013119","#F44336"],["Very High","\u2265180/\u2265120","#B71C1C"]].map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid var(--border)"><span style="display:flex;align-items:center;gap:.5rem"><span style="width:9px;height:9px;background:${c};border-radius:50%;display:inline-block"></span><span style="font-size:.76rem">${l}</span></span><span style="font-size:.72rem;color:var(--txt2)">${v} mmHg</span></div>`).join("")}<div style="font-size:.6rem;color:var(--txt3);margin-top:.4rem">Source: NICE NG136 / British and Irish Hypertension Society</div></div>`;
-  const log=Object.entries(ST.bpData).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,7).flatMap(([d,es])=>es.map((e,i)=>`<div class="entry"><div><div class="ent-date">${fmtD(d)} &middot; ${e.time||""}</div><div class="ent-val">${e.sys}/${e.dia} <span style="font-size:.85rem;color:var(--txt2)">mmHg</span></div><div class="ent-sub">Pulse ${e.pulse||"--"} bpm &middot; ${e.arm||"Arm not noted"}</div>${e.meds?`<div class="ent-sub">Meds: ${e.meds}</div>`:""} ${e.notes?`<div class="ent-sub">${e.notes}</div>`:""}</div><button class="btn-del" onclick="delBP('${d}',${i})">&#10005;</button></div>`)).join("")||`<div class="empty"><div class="empty-icon">\u{1FA7A}</div><h3>No readings yet</h3><p>Log your first reading above.</p></div>`;
+  const log=Object.entries(ST.bpData).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,7).flatMap(([d,es])=>es.map((e,i)=>`<div class="entry"><div><div class="ent-date">${fmtD(d)} &middot; ${e.time||""}</div><div class="ent-val">${e.sys}/${e.dia} <span style="font-size:.85rem;color:var(--txt2)">mmHg</span></div><div class="ent-sub">Pulse ${e.pulse||"--"} bpm &middot; ${e.arm||"Arm not noted"}</div>${e.meds?`<div class="ent-sub">Meds: ${e.meds}</div>`:""} ${e.notes?`<div class="ent-sub">${e.notes}</div>`:""}</div><div class="ent-actions"><button class="btn-edit" onclick="editBP('${d}',${i})">&#9998;</button><button class="btn-del" onclick="delBP('${d}',${i})">&#10005;</button></div></div>`)).join("")||`<div class="empty"><div class="empty-icon">\u{1FA7A}</div><h3>No readings yet</h3><p>Log your first reading above.</p></div>`;
   const calLeg=`<div class="leg"><div class="leg-dot" style="background:#4CAF50"></div>Optimal</div><div class="leg"><div class="leg-dot" style="background:#FFC107"></div>Elevated</div><div class="leg"><div class="leg-dot" style="background:#FF9800"></div>High</div><div class="leg"><div class="leg-dot" style="background:#F44336"></div>Very high</div>`;
-  const views=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem"><button class="th-btn${ST.bpView==="form"?" on":""}" onclick="ST.bpView='form';renderBPPage()">Log Reading</button><button class="th-btn${ST.bpView==="cal"?" on":""}" onclick="ST.bpView='cal';renderBPPage()">Calendar</button><button class="th-btn${ST.bpView==="chart"?" on":""}" onclick="ST.bpView='chart';renderBPPage()">Chart</button><button class="th-btn${ST.bpView==="log"?" on":""}" onclick="ST.bpView='log';renderBPPage()">History</button></div>`;
+  const views=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem"><button class="th-btn${ST.bpView==="form"?" on":""}" onclick="ST._editBP=null;ST.bpView='form';renderBPPage()">Log Reading</button><button class="th-btn${ST.bpView==="cal"?" on":""}" onclick="ST.bpView='cal';renderBPPage()">Calendar</button><button class="th-btn${ST.bpView==="chart"?" on":""}" onclick="ST.bpView='chart';renderBPPage()">Chart</button><button class="th-btn${ST.bpView==="log"?" on":""}" onclick="ST.bpView='log';renderBPPage()">History</button></div>`;
   let main="";
-  if(ST.bpView==="form") main=`<div class="card"><div class="card-title">Log a reading</div><form id="bpf" onsubmit="event.preventDefault();submitBP()"><div class="row2"><div class="field"><label>Systolic (top number)</label><input type="number" name="sys" placeholder="e.g. 120"/></div><div class="field"><label>Diastolic (bottom number)</label><input type="number" name="dia" placeholder="e.g. 80"/></div></div><div class="row2"><div class="field"><label>Pulse (bpm)</label><input type="number" name="pulse" placeholder="e.g. 72"/></div><div class="field"><label>Arm used</label><select name="arm"><option value="">Select</option><option>Left arm</option><option>Right arm</option></select></div></div><div class="field"><label>Medication taken before this reading?</label><select name="meds"><option value="">Select</option><option>Yes &mdash; taken before reading</option><option>Yes &mdash; taken after reading</option><option>No medications</option></select></div><div class="field"><label>Notes</label><textarea name="notes" placeholder="Caffeine, exercise, stress before reading..."></textarea></div><button type="submit" class="btn btn-pri btn-full">Save Reading</button></form></div>${flagHtml}${refCard}<div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Sit quietly for 5 minutes before measuring. Record readings at a consistent time of day. Note whether taken before or after medication &mdash; this affects interpretation. This log can be shared with your GP or pharmacist.</div></div><div class="disclaimer"><p>This tracker does not diagnose or treat high blood pressure. Readings flagged as high are based on NICE NG136 thresholds and are for information only. Always consult your GP for medical assessment.</p></div>`;
+  if(ST.bpView==="form"){
+    const ebp=ST._editBP?ST.bpData[ST._editBP.date][ST._editBP.index]:null;
+    main=`<div class="card"><div class="card-title">${ebp?`Edit reading \u2014 ${fmtD(ST._editBP.date)}`:"Log a reading"}</div><form id="bpf" onsubmit="event.preventDefault();submitBP()"><div class="row2"><div class="field"><label>Systolic (top number)</label><input type="number" name="sys" value="${ebp?ebp.sys:""}" placeholder="e.g. 120"/></div><div class="field"><label>Diastolic (bottom number)</label><input type="number" name="dia" value="${ebp?ebp.dia:""}" placeholder="e.g. 80"/></div></div><div class="row2"><div class="field"><label>Pulse (bpm)</label><input type="number" name="pulse" value="${ebp?ebp.pulse||"":""}" placeholder="e.g. 72"/></div><div class="field"><label>Arm used</label><select name="arm"><option value="">Select</option><option${ebp&&ebp.arm==="Left arm"?" selected":""}>Left arm</option><option${ebp&&ebp.arm==="Right arm"?" selected":""}>Right arm</option></select></div></div><div class="field"><label>Medication taken before this reading?</label><select name="meds"><option value="">Select</option><option${ebp&&ebp.meds==="Yes — taken before reading"?" selected":""}>Yes &mdash; taken before reading</option><option${ebp&&ebp.meds==="Yes — taken after reading"?" selected":""}>Yes &mdash; taken after reading</option><option${ebp&&ebp.meds==="No medications"?" selected":""}>No medications</option></select></div><div class="field"><label>Notes</label><textarea name="notes" placeholder="Caffeine, exercise, stress before reading...">${ebp?ebp.notes||"":""}</textarea></div><button type="submit" class="btn btn-pri btn-full">${ebp?"Update Reading":"Save Reading"}</button>${ebp?`<button type="button" class="btn btn-full" style="background:none;color:var(--txt2);margin-top:.5rem" onclick="ST._editBP=null;renderBPPage()">Cancel edit</button>`:""}</form></div>${flagHtml}${refCard}<div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Sit quietly for 5 minutes before measuring. Record readings at a consistent time of day. Note whether taken before or after medication &mdash; this affects interpretation. This log can be shared with your GP or pharmacist.</div></div><div class="disclaimer"><p>This tracker does not diagnose or treat high blood pressure. Readings flagged as high are based on NICE NG136 thresholds and are for information only. Always consult your GP for medical assessment.</p></div>`;
+  }
   else if(ST.bpView==="cal") main=renderCal(ST.bpMonth,d=>bpCalColor(ST.bpData[d]),calLeg,"bpDayClick")+`<div class="info-box"><p>Colours are based on average systolic readings per day. Tap any day to see your full readings.</p></div>`;
   else if(ST.bpView==="chart") main=chartHtml+refCard;
   else main=`<p class="sec-lbl">Reading History</p>${log}`;
@@ -688,26 +709,54 @@ function setWMed(v){
 }
 function saveWeekly(){
   const f=document.getElementById("wf");if(!f)return;
-  ST.weeklyData[getWeekKey()]={journal:f.journal.value,mood:ST._wMood,reflection:f.reflection.value,water:ST._wWater,meditation:ST._wMed,medMins:f.medmins?f.medmins.value:"",exercise:f.exercise.value,exDur:f.exdur?f.exdur.value:"",ts:Date.now()};
-  sv("weeklyData");alert("Weekly diary saved successfully.");renderDiaryPage();
+  const key=ST._editWeekKey||getWeekKey();
+  ST.weeklyData[key]={journal:f.journal.value,mood:ST._wMood,reflection:f.reflection.value,water:ST._wWater,meditation:ST._wMed,medMins:f.medmins?f.medmins.value:"",exercise:f.exercise.value,exDur:f.exdur?f.exdur.value:"",ts:Date.now()};
+  sv("weeklyData");const wasEdit=!!ST._editWeekKey&&ST._editWeekKey!==getWeekKey();ST._editWeekKey=null;
+  alert(wasEdit?"Weekly entry updated successfully.":"Weekly diary saved successfully.");renderDiaryPage();
 }
 function saveMonthly(){
   const f=document.getElementById("mf");if(!f)return;
-  ST.monthlyData[getMonthKey()]={reflection:f.reflection.value,wentWell:f.wentWell.value,didntGoWell:f.didntGoWell.value,doDifferently:f.doDifferently.value,mood:ST._mMood,highlight:f.highlight.value,ts:Date.now()};
-  sv("monthlyData");alert("Monthly reflection saved successfully.");renderDiaryPage();
+  const key=ST._editMonthKey||getMonthKey();
+  ST.monthlyData[key]={reflection:f.reflection.value,wentWell:f.wentWell.value,didntGoWell:f.didntGoWell.value,doDifferently:f.doDifferently.value,mood:ST._mMood,highlight:f.highlight.value,ts:Date.now()};
+  sv("monthlyData");const wasEdit=!!ST._editMonthKey&&ST._editMonthKey!==getMonthKey();ST._editMonthKey=null;
+  alert(wasEdit?"Monthly entry updated successfully.":"Monthly reflection saved successfully.");renderDiaryPage();
 }
+function wkLabel(k){const d=new Date(k+"T00:00:00");const end=new Date(d);end.setDate(d.getDate()+6);const opt={day:"numeric",month:"short"};return `${d.toLocaleDateString("en-GB",opt)} \u2013 ${end.toLocaleDateString("en-GB",opt)}`;}
+function moLabel(k){const d=new Date(k+"-01T00:00:00");return d.toLocaleDateString("en-GB",{month:"long",year:"numeric"});}
+function editWeekly(k){ST._editWeekKey=k;const wd=ST.weeklyData[k]||{};ST._wMood=wd.mood||0;ST._wWater=wd.water||0;ST._wMed=wd.meditation||false;ST._diaryMode="form";renderDiaryPage();}
+function delWeekly(k){if(!confirm("Delete this week's journal entry?"))return;delete ST.weeklyData[k];sv("weeklyData");renderDiaryPage();}
+function editMonthly(k){ST._editMonthKey=k;const md=ST.monthlyData[k]||{};ST._mMood=md.mood||0;ST._diaryMode="form";renderDiaryPage();}
+function delMonthly(k){if(!confirm("Delete this month's reflection?"))return;delete ST.monthlyData[k];sv("monthlyData");renderDiaryPage();}
 function renderDiaryPage(){
-  const wd=ST.weeklyData[getWeekKey()]||{};const md=ST.monthlyData[getMonthKey()]||{};
+  const wKey=ST._editWeekKey||getWeekKey();const mKey=ST._editMonthKey||getMonthKey();
+  const wd=ST.weeklyData[wKey]||{};const md=ST.monthlyData[mKey]||{};
   if(!ST._diaryInit){ST._wMood=wd.mood||0;ST._wWater=wd.water||0;ST._wMed=wd.meditation||false;ST._mMood=md.mood||0;ST._diaryInit=true;}
   const wM=MOODS.map((e,i)=>`<button type="button" class="face-btn wmood-btn${ST._wMood===i+1?" on":""}" onclick="setWMood(${i+1})">${e}</button>`).join("");
   const mM=MOODS.map((e,i)=>`<button type="button" class="face-btn mmood-btn${ST._mMood===i+1?" on":""}" onclick="setMMood(${i+1})">${e}</button>`).join("");
   const wD=[1,2,3,4,5,6,7,8].map(i=>`<div class="w-drop${ST._wWater>=i?" on":""}" onclick="setWater(${i})">\u{1F4A7}</div>`).join("");
   const medT=`<div class="tog-row"><button type="button" class="tog wmed-yes${ST._wMed?" on":""}" onclick="setWMed(true)">Yes</button><button type="button" class="tog wmed-no${!ST._wMed?" on":""}" onclick="setWMed(false)">No</button></div>`;
-  const tabs=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem"><button class="th-btn${ST.diaryTab==="weekly"?" on":""}" onclick="ST.diaryTab='weekly';renderDiaryPage()">Weekly Journal</button><button class="th-btn${ST.diaryTab==="monthly"?" on":""}" onclick="ST.diaryTab='monthly';renderDiaryPage()">Monthly Reflection</button></div>`;
+  const tabs=`<div style="display:flex;gap:.5rem;padding:.75rem 1rem"><button class="th-btn${ST.diaryTab==="weekly"?" on":""}" onclick="ST.diaryTab='weekly';ST._diaryMode='form';ST._editWeekKey=null;renderDiaryPage()">Weekly Journal</button><button class="th-btn${ST.diaryTab==="monthly"?" on":""}" onclick="ST.diaryTab='monthly';ST._diaryMode='form';ST._editMonthKey=null;renderDiaryPage()">Monthly Reflection</button></div>`;
+  const subnav=`<div style="display:flex;gap:.5rem;padding:0 1rem .75rem"><button class="th-btn${ST._diaryMode==="form"?" on":""}" onclick="ST._diaryMode='form';${ST.diaryTab==="weekly"?"ST._editWeekKey=null":"ST._editMonthKey=null"};renderDiaryPage()">${ST.diaryTab==="weekly"?"This Week":"This Month"}</button><button class="th-btn${ST._diaryMode==="history"?" on":""}" onclick="ST._diaryMode='history';renderDiaryPage()">History</button></div>`;
   let main="";
-  if(ST.diaryTab==="weekly") main=`<div class="card"><div class="card-title">This Week&#8217;s Wellness Journal</div><form id="wf" onsubmit="event.preventDefault();saveWeekly()"><div class="field"><label>Journal &mdash; write freely about your week</label><textarea name="journal" style="min-height:130px" placeholder="How has this week been? What&#8217;s on your mind?">${wd.journal||""}</textarea></div><div class="field"><label>Overall mood this week</label><div class="mood-faces">${wM}</div></div><div class="field"><label>Weekly reflection &mdash; what stood out?</label><textarea name="reflection" placeholder="Patterns, wins, challenges noticed this week...">${wd.reflection||""}</textarea></div><div class="field"><label>Average glasses of water per day</label><div class="water-track">${wD}</div></div><div class="field"><label>Did you meditate or practise mindfulness this week?</label>${medT}</div>${ST._wMed?`<div class="field" id="medMinsField"><label>Total minutes of mindfulness</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`:`<div class="field" id="medMinsField" style="display:none"><label>Total minutes of mindfulness</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`}<div class="field"><label>Exercise and movement this week</label><textarea name="exercise" placeholder="Types of activity, frequency, how you felt..." style="min-height:80px">${wd.exercise||""}</textarea></div><div class="field"><label>Total active minutes this week</label><input type="number" name="exdur" placeholder="e.g. 120" value="${wd.exDur||""}"/></div><button type="submit" class="btn btn-pri btn-full">Save This Week</button></form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Tracking hydration, movement and mindfulness together can help reveal patterns in energy and mood. There is good evidence that even short daily mindfulness practice supports stress management and sleep quality.</div></div>`;
-  else main=`<div class="card"><div class="card-title">Monthly Reflection</div><form id="mf" onsubmit="event.preventDefault();saveMonthly()"><div class="field"><label>How do I feel about this month?</label><div class="mood-faces">${mM}</div></div><div class="field"><label>Monthly reflection &mdash; looking back</label><textarea name="reflection" style="min-height:120px" placeholder="What has this month been like for you overall?">${md.reflection||""}</textarea></div><div class="field"><label>What went well this month?</label><textarea name="wentWell" placeholder="Wins, achievements, moments you are proud of...">${md.wentWell||""}</textarea></div><div class="field"><label>What was difficult or didn&#8217;t go to plan?</label><textarea name="didntGoWell" placeholder="Challenges, setbacks, things that were hard...">${md.didntGoWell||""}</textarea></div><div class="field"><label>What would I do differently next month?</label><textarea name="doDifferently" placeholder="Changes to make, habits to build or let go of...">${md.doDifferently||""}</textarea></div><div class="field"><label>My highlight of this month</label><textarea name="highlight" placeholder="The one moment or thing I want to remember..." style="min-height:80px">${md.highlight||""}</textarea></div><button type="submit" class="btn btn-pri btn-full">Save Reflection</button></form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Monthly reflection builds self-awareness over time. Research in positive psychology shows that regularly noting what went well &mdash; alongside what to improve &mdash; supports both resilience and meaningful behaviour change.</div></div>`;
-  document.getElementById("s-diary").innerHTML=`<div class="top"><h2>Wellness Diary</h2><div class="top-sub">Journal &mdash; reflect &mdash; grow</div></div>${tabs}${main}`;
+  if(ST._diaryMode==="history"){
+    if(ST.diaryTab==="weekly"){
+      const items=Object.entries(ST.weeklyData).sort((a,b)=>b[0].localeCompare(a[0]));
+      main=items.length?items.map(([k,e])=>`<div class="entry"><div><div class="ent-date">${wkLabel(k)}</div><div class="ent-val">${MOODS[e.mood-1]||""} ${e.water?`&nbsp;\u{1F4A7} ${e.water}/8`:""}</div>${e.journal?`<div class="ent-diary">"${e.journal.slice(0,120)}${e.journal.length>120?"\u2026":""}"</div>`:""}</div><div class="ent-actions"><button class="btn-edit" onclick="editWeekly('${k}')">&#9998;</button><button class="btn-del" onclick="delWeekly('${k}')">&#10005;</button></div></div>`).join(""):`<div class="empty"><div class="empty-icon">\u{1F4D6}</div><h3>No entries yet</h3><p>Save your first weekly journal to begin tracking.</p></div>`;
+    } else {
+      const items=Object.entries(ST.monthlyData).sort((a,b)=>b[0].localeCompare(a[0]));
+      main=items.length?items.map(([k,e])=>`<div class="entry"><div><div class="ent-date">${moLabel(k)}</div><div class="ent-val">${MOODS[e.mood-1]||""}</div>${e.highlight?`<div class="ent-diary">"${e.highlight.slice(0,120)}${e.highlight.length>120?"\u2026":""}"</div>`:""}</div><div class="ent-actions"><button class="btn-edit" onclick="editMonthly('${k}')">&#9998;</button><button class="btn-del" onclick="delMonthly('${k}')">&#10005;</button></div></div>`).join(""):`<div class="empty"><div class="empty-icon">\u{1F4D6}</div><h3>No entries yet</h3><p>Save your first monthly reflection to begin tracking.</p></div>`;
+    }
+    main=`<p class="sec-lbl">${ST.diaryTab==="weekly"?"Weekly Journal History":"Monthly Reflection History"}</p>${main}`;
+  }
+  else if(ST.diaryTab==="weekly"){
+    const editingPast=ST._editWeekKey&&ST._editWeekKey!==getWeekKey();
+    main=`<div class="card"><div class="card-title">${editingPast?`Editing week \u2014 ${wkLabel(wKey)}`:"This Week\u2019s Wellness Journal"}</div><form id="wf" onsubmit="event.preventDefault();saveWeekly()"><div class="field"><label>Journal &mdash; write freely about your week</label><textarea name="journal" style="min-height:130px" placeholder="How has this week been? What&#8217;s on your mind?">${wd.journal||""}</textarea></div><div class="field"><label>Overall mood this week</label><div class="mood-faces">${wM}</div></div><div class="field"><label>Weekly reflection &mdash; what stood out?</label><textarea name="reflection" placeholder="Patterns, wins, challenges noticed this week...">${wd.reflection||""}</textarea></div><div class="field"><label>Average glasses of water per day</label><div class="water-track">${wD}</div></div><div class="field"><label>Did you meditate or practise mindfulness this week?</label>${medT}</div>${ST._wMed?`<div class="field" id="medMinsField"><label>Total minutes of mindfulness</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`:`<div class="field" id="medMinsField" style="display:none"><label>Total minutes of mindfulness</label><input type="number" name="medmins" placeholder="e.g. 30" value="${wd.medMins||""}"/></div>`}<div class="field"><label>Exercise and movement this week</label><textarea name="exercise" placeholder="Types of activity, frequency, how you felt..." style="min-height:80px">${wd.exercise||""}</textarea></div><div class="field"><label>Total active minutes this week</label><input type="number" name="exdur" placeholder="e.g. 120" value="${wd.exDur||""}"/></div><button type="submit" class="btn btn-pri btn-full">${editingPast?"Update Entry":"Save This Week"}</button>${editingPast?`<button type="button" class="btn btn-full" style="background:none;color:var(--txt2);margin-top:.5rem" onclick="ST._editWeekKey=null;ST._diaryMode='history';renderDiaryPage()">Cancel edit</button>`:""}</form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Tracking hydration, movement and mindfulness together can help reveal patterns in energy and mood. There is good evidence that even short daily mindfulness practice supports stress management and sleep quality.</div></div>`;
+  }
+  else {
+    const editingPast=ST._editMonthKey&&ST._editMonthKey!==getMonthKey();
+    main=`<div class="card"><div class="card-title">${editingPast?`Editing \u2014 ${moLabel(mKey)}`:"Monthly Reflection"}</div><form id="mf" onsubmit="event.preventDefault();saveMonthly()"><div class="field"><label>How do I feel about this month?</label><div class="mood-faces">${mM}</div></div><div class="field"><label>Monthly reflection &mdash; looking back</label><textarea name="reflection" style="min-height:120px" placeholder="What has this month been like for you overall?">${md.reflection||""}</textarea></div><div class="field"><label>What went well this month?</label><textarea name="wentWell" placeholder="Wins, achievements, moments you are proud of...">${md.wentWell||""}</textarea></div><div class="field"><label>What was difficult or didn&#8217;t go to plan?</label><textarea name="didntGoWell" placeholder="Challenges, setbacks, things that were hard...">${md.didntGoWell||""}</textarea></div><div class="field"><label>What would I do differently next month?</label><textarea name="doDifferently" placeholder="Changes to make, habits to build or let go of...">${md.doDifferently||""}</textarea></div><div class="field"><label>My highlight of this month</label><textarea name="highlight" placeholder="The one moment or thing I want to remember..." style="min-height:80px">${md.highlight||""}</textarea></div><button type="submit" class="btn btn-pri btn-full">${editingPast?"Update Entry":"Save Reflection"}</button>${editingPast?`<button type="button" class="btn btn-full" style="background:none;color:var(--txt2);margin-top:.5rem" onclick="ST._editMonthKey=null;ST._diaryMode='history';renderDiaryPage()">Cancel edit</button>`:""}</form></div><div class="pnote"><div class="pnote-lbl">Pharmacist&#8217;s Note</div><div class="pnote-txt">Monthly reflection builds self-awareness over time. Research in positive psychology shows that regularly noting what went well &mdash; alongside what to improve &mdash; supports both resilience and meaningful behaviour change.</div></div>`;
+  }
+  document.getElementById("s-diary").innerHTML=`<div class="top"><h2>Wellness Diary</h2><div class="top-sub">Journal &mdash; reflect &mdash; grow</div></div>${tabs}${subnav}${main}`;
 }
 
 // ═══════════════════════════════════════════
@@ -818,4 +867,4 @@ setTheme(ST.theme);
 if(checkAccess()) render();
 </script>
 </body>
-</html>
+  </html>
