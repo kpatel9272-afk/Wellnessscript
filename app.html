@@ -339,7 +339,8 @@ async function verifyGumroadLicense(licenseKey){
 }
 
 async function checkCode(){
-  const raw=document.getElementById("gate-code").value.trim().toUpperCase();
+  const rawOriginal=document.getElementById("gate-code").value.trim();
+  const raw=rawOriginal.toUpperCase();
   const err=document.getElementById("gate-err");
   const btn=document.getElementById("gate-enter-btn");
   if(!raw){err.textContent="Incorrect code. Please check your confirmation email or contact thewellnessscriptedu@gmail.com";err.classList.add("show");return;}
@@ -349,16 +350,16 @@ async function checkCode(){
     grantAccess();
     return;
   }
-  // Not a legacy code — try verifying as a Gumroad license key.
+  // Not a legacy code — try verifying as a Gumroad license key (preserve original case).
   if(btn){btn.textContent="Checking...";btn.disabled=true;}
   try{
-    const data=await verifyGumroadLicense(raw);
+    const data=await verifyGumroadLicense(rawOriginal);
     if(data && data.success){
       if(data.uses && data.uses>GUMROAD_MAX_USES){
         err.textContent="This code has reached its device limit. If this is a mistake, contact thewellnessscriptedu@gmail.com";
         err.classList.add("show");
       } else {
-        localStorage.setItem("tws_gr_license",raw);
+        localStorage.setItem("tws_gr_license",rawOriginal);
         grantAccess();
         return;
       }
@@ -867,4 +868,4 @@ setTheme(ST.theme);
 if(checkAccess()) render();
 </script>
 </body>
-  </html>
+</html>
